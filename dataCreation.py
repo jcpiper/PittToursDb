@@ -105,6 +105,9 @@ yr = ('2016', '2017', '2018', '2019')
 
 tix = ('Y', 'N')
 
+cities = ('NY', 'PIT', 'BOS', 'CHI', 'LA', 'MIL')
+
+
 script.write('\n\n--Reservation sample data\n\n')
 
 for x in range(0,350):
@@ -116,7 +119,7 @@ for x in range(0,350):
 	year = yr[random.randint(0,3)]
 	
 	resy = 'insert into Reservation values (\'' + str(resNum) + '\', \'' + str(ids[x%len(ids)]) + '\', \'' + str(cost) + '\', \'' + str(card_num[x%len(ids)]) + '\', \'' + str(day) + '-' + mth + '-' + year
-	resy2 = '\', \'' + tix[random.randint(0,1)] + '\', \'PIT\', \'CHI\');'
+	resy2 = '\', \'' + tix[random.randint(0,1)] + '\', \''+ cities[x%len(cities)] + '\', \'' + cities[(x+1)%len(cities)] + '\');'
 
 	script.write(resy + resy2 + '\n')
 	
@@ -194,7 +197,6 @@ script.write('\n\n--Flight sample data\n\n')
 
 print('Creating 100 flights\n')
 
-cities = ('NY', 'PIT', 'BOS', 'CHI', 'LA', 'MIL')
 print('cities length: ' + str(len(cities)))
 sched = 'SMTWTFS'
 for i in range(0,100):

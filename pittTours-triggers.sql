@@ -27,4 +27,23 @@ create or replace procedure delete_reservations(flightNo in flight.flight_number
 	end;
 	/
 
---get all flights w/ planes that can hold 
+--need to find number of ticketed reservations for a given flight
+create or replace view reservations_per_flight as
+	select f.flight_number as flightNo, count(*) as reservations
+	from flight f, reservation r
+	where f.departure_city = r.start_city and f.arrival_city = r.end_city and r.ticketed = 'Y'
+	group by f.flight_number
+	order by reservations;
+	
+	
+--get all planes that can hold the ticketed reservations for a given flight
+
+create or replace view flight_options as
+select * from plane p, reservations_per_flight r
+where p.plane_capacity < r.reservations;
+-- create or replace view test_view as
+-- select count(*) as resys
+-- from flight f join reservation r on
+-- (f.departure_city = r.start_city and f.arrival_city = r.end_city)
+-- where r.ticketed = 'Y'
+-- group by f.flight_number;
