@@ -116,7 +116,7 @@ for x in range(0,350):
 	year = yr[random.randint(0,3)]
 	
 	resy = 'insert into Reservation values (\'' + str(resNum) + '\', \'' + str(ids[x%len(ids)]) + '\', \'' + str(cost) + '\', \'' + str(card_num[x%len(ids)]) + '\', \'' + str(day) + '-' + mth + '-' + year
-	resy2 = '\', \'' + tix[random.randint(0,1)] + '\');'
+	resy2 = '\', \'' + tix[random.randint(0,1)] + '\', \'PIT\', \'CHI\');'
 
 	script.write(resy + resy2 + '\n')
 	
@@ -199,14 +199,17 @@ print('cities length: ' + str(len(cities)))
 sched = 'SMTWTFS'
 for i in range(0,100):
 	flt_num = i
-	a_id = i%9
+	a_id = (i%10)+1
 	p_tp = i%30
 	d_t = random.randint(100,2359)
 	a_t = d_t + random.randint(100,800)
 	
 	x = i + 1
-	script.write('insert into Flight values (\'' + str(i) + '\', \'00' + str(a_id+1) + '\', \'C0' + str(p_tp) + '\', \'' + cities[i%len(cities)] + '\', \'' + cities[x%len(cities)] + '\', \'' + str(d_t) + '\', \'' + str(a_t) + '\', \'' + sched + '\');\n')
-	
+	if a_id < 10:
+		script.write('insert into Flight values (\'' + str(i) + '\', \'00' + str(a_id) + '\', \'C0' + str(p_tp) + '\', \'' + cities[i%len(cities)] + '\', \'' + cities[x%len(cities)] + '\', \'' + str(d_t) + '\', \'' + str(a_t) + '\', \'' + sched + '\');\n')
+	else:
+		script.write('insert into Flight values (\'' + str(i) + '\', \'0' + str(a_id) + '\', \'C0' + str(p_tp) + '\', \'' + cities[i%len(cities)] + '\', \'' + cities[x%len(cities)] + '\', \'' + str(d_t) + '\', \'' + str(a_t) + '\', \'' + sched + '\');\n')
+
 print('Flights created\n')
 	
 

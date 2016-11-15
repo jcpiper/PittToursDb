@@ -26,7 +26,7 @@ create table Plane(
 	last_service_date date,
 	year int,
 	owner_id varchar2(5) not null,
-	constraint plane_pk primary key (plane_type),
+	constraint plane_pk primary key (plane_type, owner_id),
 	constraint plane_fk foreign key (owner_id) references Airline (airline_id)
 );
 
@@ -34,19 +34,21 @@ create table Flight(
 	flight_number varchar2(3) not null,
 	airline_id varchar2(5) not null,
 	plane_type char(4) not null,
-	departure_city varchar2(3),
-	arrival_city varchar2(3),
+	departure_city char(3),
+	arrival_city char(3),
 	departure_time varchar2(4),
 	arrival_time varchar2(4),
 	weekly_schedule varchar2(7),
 	constraint flight_pk primary key (flight_number),
 	constraint flt_airline_fk foreign key (airline_id) references Airline (airline_id),
-	constraint flt_plane_fk foreign key (plane_type) references Plane (plane_type)
+	constraint flt_plane_fk foreign key (plane_type, airline_id) references Plane (plane_type, owner_id)
 );
 
+-- Price table
+-- assumes only one flight serves each route
 create table Price(
-	departure_city varchar2(3),
-	arrival_city varchar2(3),
+	departure_city char(3),
+	arrival_city char(3),
 	airline_id varchar(5) not null,
 	high_price int,
 	low_price int,
@@ -81,8 +83,11 @@ create table Reservation(
 	credit_card_num varchar2(16),
 	reservation_date date,
 	ticketed varchar2(1),
+	start_city char(3),
+	end_city char(3),
 	constraint reservation_pk primary key (reservation_number),
 	constraint reservation_fk foreign key (cid) references Customer (cid)
+	-- constraint reservation_price_fk foreign key (start_city, end_city) references Price (departure_city, arrival_city)
 );
 
 -- create reservation_detail table
