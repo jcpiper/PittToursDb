@@ -14,11 +14,11 @@ create or replace procedure switch_plane(flightNo in flight.flight_number%TYPE, 
 		from plane p, flight f
 		where p.plane_type = f.plane_type and p.owner_id = f.airline_id and f.flight_number = flightNo;
 		
-		select Capacity into newCap
+		select "Capacity" into newCap
 		from flight_options
 		where flight_number = flightNo;
 		
-		if cap < planeCap then
+		if cap < newCap then
 			update flight
 			set plane_type = newPlane
 			where flight_number = flightNo;
@@ -26,7 +26,7 @@ create or replace procedure switch_plane(flightNo in flight.flight_number%TYPE, 
 		commit;
 	end;
 	/
-	
+show errors;
 create or replace procedure delete_reservations(flightNo in reservation_detail.flight_number%TYPE)
 	is
 	begin
