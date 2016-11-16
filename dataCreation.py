@@ -109,9 +109,10 @@ cities = ('NY', 'PIT', 'BOS', 'CHI', 'LA', 'MIL')
 
 
 script.write('\n\n--Reservation sample data\n\n')
-
+res_nums = []
 for x in range(0,350):
 	resNum = random.randint(10000, 99999)
+	res_nums.append(resNum)
 	# id = random.randint(0, len(ids)-1)
 	cost = random.randint(0, 5000)
 	mth = mon[random.randint(0,11)]
@@ -173,7 +174,7 @@ owner = ('001', '002', '003', '004', '005', '006', '007', '008', '009', '010')
 plane = 'insert into Plane values ('
 for i in range(0,30):
 	mth = mon[random.randint(0,11)]
-	day = random.randint(0,28)
+	day = random.randint(1,28)
 	year = random.randint(1985,2010)
 	script.write(plane + '\'C0' + str(i) + '\', \'Cessna\', ' + str(random.randint(50,250)) + ', \'' + str(day) + '-' + mth + '-' + str(year) + '\', ' + str(random.randint(1965,2010)) + ', \'' + owner[i%len(owner)] + '\');\n')
 
@@ -213,6 +214,30 @@ for i in range(0,100):
 		script.write('insert into Flight values (\'' + str(i) + '\', \'0' + str(a_id) + '\', \'C0' + str(p_tp) + '\', \'' + cities[i%len(cities)] + '\', \'' + cities[x%len(cities)] + '\', \'' + str(d_t) + '\', \'' + str(a_t) + '\', \'' + sched + '\');\n')
 
 print('Flights created\n')
+
+
+# Write reservation details to script
+
+# create table Reservation_detail(
+	# reservation_number varchar2(5),
+	# flight_number varchar2(3),
+	# flight_date date,
+	# leg int,
+	# constraint res_detail_pk primary key (reservation_number, leg),
+	# constraint res_detail_fk foreign key (reservation_number) references Reservation (reservation_number),
+	# constraint res_det_flt_fk foreign key (flight_number) references Flight (flight_number)
+# );
+
+print('Creating 300 reservation details\n')
+script.write('\n\n--Reservation Detail sample data\n\n')
+year = '2017'
+for i in range(0,350):
+	flt_num = i%100
+	mth = mon[random.randint(0,11)]
+	day = random.randint(1,28)
 	
+	script.write('insert into Reservation_detail values (\'' + str(res_nums[i]) + '\', \'' + str(flt_num) + '\', \'' + str(day) + '-' + mth + '-' + year + '\', ' + str(1) + ');\n')
+	
+print('300 resy detail records generated')
 
 script.close()

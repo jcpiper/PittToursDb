@@ -98,7 +98,8 @@ create table Reservation_detail(
 	flight_date date,
 	leg int,
 	constraint res_detail_pk primary key (reservation_number, leg),
-	constraint res_detail_fk foreign key (reservation_number) references Reservation (reservation_number)
+	constraint res_detail_fk foreign key (reservation_number) references Reservation (reservation_number),
+	constraint res_det_flt_fk foreign key (flight_number) references Flight (flight_number)
 );
 
 -- time info table
