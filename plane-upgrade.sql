@@ -64,3 +64,33 @@ create or replace procedure change_plane_type (currPlane in plane.plane_capacity
 	end;
 	/
 show errors;
+
+-- Get the plane type for a reserved flight
+create or replace function get_plane_type_for_flight (resy in varchar2) return char
+	as
+	plane char(4);
+	
+	begin
+		select plane_type into plane
+		from flight
+		where flight_number = resy;
+	
+		return plane;
+	end;
+	/
+show errors;
+
+create or replace function get_airline_for_flight (resy in varchar2) return varchar2
+	as 
+	airline varchar2(5);
+	
+	begin
+		select airline_id into airline
+		from flight
+		where flight_number = resy;
+		
+		return airline;
+	end;
+	/
+show errors;
+		
