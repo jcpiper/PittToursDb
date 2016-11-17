@@ -108,7 +108,7 @@ show errors;
 -- assumes sys-time is updated every hour on the hour
 create or replace trigger cancelReservation
 	after insert on Sys_time
-	
+
 	for each row
 	begin
 		check_flights(:new.c_date);
@@ -119,23 +119,19 @@ show errors;
 
 
 -- Returns number of reservations on the same flight as a given reservation num
-create or replace function resOnFlight(resNum in varchar2)
+create or replace function resOnFlight(flightNum in varchar2)
   return int
   is
   this_flight varchar2(3);
   on_flight int;
   begin
-    select flight_number into this_flight
-    from Reservation_detail rD
-    where rD.reservation_number = resNum;
-
     select count(*) into on_flight
     from Reservation_detail
-    where flight_number = this_flight;
+    where flight_number = flightNum;
 
     return on_flight;
   end;
-
+/
 
 -- Trigger adjustTicket
 create or replace trigger adjustTicket
@@ -156,9 +152,12 @@ begin
 end;
 /
 
+set constraints flt_airline_fk, flt_plane_fk deferred;
+
 -- Trigger planeUpgrade
 create or replace trigger planeUpgrade
   before insert on Reservation
+  for each row
   declare
     thisFlightNum varchar2(3);
     numResThisFlight int;
@@ -168,10 +167,10 @@ create or replace trigger planeUpgrade
     isLargestPlane int;
     flightFull EXCEPTION;
   begin
-    select flight_number into thisFlightNum from Reservation_detail rD
-    where rD.reservation_number = :old.reservation_number;
+    select flight_number into thisFlightNum from Flight f
+    where f.departure_city = :new.start_city AND f.arrival_city = :new.end_city;
 
-    numResThisFlight := resOnFlight(:old.reservation_number);
+    numResThisFlight := resOnFlight(thisFlightNum);
 
     planeTypeThisFlight := get_plane_type_for_flight(thisFlightNum);
 
@@ -182,13 +181,13 @@ create or replace trigger planeUpgrade
 
     isLargestPlane := -1;
     isLargestPlane := is_biggest_plane(planeTypeThisFlight);
-		
-		set constraints all deferred;
-		
-    if numResThisFlight = plane_capacity AND isLargestPlane = 0
+
+		--set constraints all deferred;
+
+    if numResThisFlight = planeCapThisFlight AND isLargestPlane = 0
       then
         change_plane_type(planeCapThisFlight, planeTypeThisFlight, thisFlightNum);
-    elsif numResThisFlight = plane_capacity AND isLargestPlane = 1
+    elsif numResThisFlight = planeCapThisFlight AND isLargestPlane = 1
       then
         raise flightFull;
     end if;
