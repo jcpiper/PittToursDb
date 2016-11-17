@@ -93,4 +93,26 @@ create or replace function get_airline_for_flight (resy in varchar2) return varc
 	end;
 	/
 show errors;
+
+create or replace function is_biggest_plane (plnType in char) return int
+	as
+	cap int;
+	lrg_cap int;
+	
+	begin
+		select plane_capacity into cap
+		from plane
+		where plane_type = plnType;
 		
+		select max(plane_capacity) into lrg_cap
+		from plane;
+		
+		if cap < lrg_cap then
+			return 0;
+		
+		else return 1;
+		
+		end if;
+	end;
+	/
+	show errors;
