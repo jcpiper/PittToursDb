@@ -14,17 +14,17 @@ create or replace procedure switch_plane(flightNo in flight.flight_number%TYPE)-
 		select plane_type into newPlane
 		from flight_options
 		fetch first row only;
-		
+
 		-- assign the capacity of the current plane being used by this flight to var cap
 		select plane_capacity into cap
 		from plane p, flight f
 		where p.plane_type = f.plane_type and p.owner_id = f.airline_id and f.flight_number = flightNo;
-		
+
 		-- assign capacity of newPlane to var newCap
 		select plane_capacity into newCap
 		from plane
 		where plane_type = newPlane;
-		
+
 		-- if capacity of newPlane is lower than that of the original plane, make newPlane the plane for the flight
 		if cap < newCap then
 			update flight
@@ -41,7 +41,7 @@ create or replace procedure delete_reservations(flightNo in reservation_detail.f
 	is
 	begin
 		delete from reservation
-		where ticketed = 'N' and reservation_number in (select r.reservation_number 
+		where ticketed = 'N' and reservation_number in (select r.reservation_number
 																										from reservation r join reservation_detail d
 																										on r.reservation_number = d.reservation_number
 																										where d.flight_number = flightNo
@@ -58,8 +58,8 @@ create or replace view reservations_per_flight as
 	where d.flight_number = f.flight_number and r.reservation_number = d.reservation_number
 	group by f.flight_number
 	order by reservations;
-	
-	
+
+
 --get all planes that can hold the ticketed reservations for a given flight
 
 create or replace view flight_options as
@@ -76,3 +76,42 @@ create or replace view flight_options as
 -- (f.departure_city = r.start_city and f.arrival_city = r.end_city)
 -- where r.ticketed = 'Y'
 -- group by f.flight_number;
+
+
+-- Returns number of reservations on the same flight as a given reservation num
+create or replace function resOnFlight(resNum in varchar2)
+  return int
+  is
+  this_flight varchar2(3);
+  on_flight int;
+  begin
+    select flight_number into this_flight
+    from Reservation_detail rD
+    where rD.reservation_number = resNum;
+
+    select count(*) into on_flight
+    from Reservation_detail
+    where flight_number = this_flight;
+
+    return on_flight;
+  end;
+
+
+-- Trigger adjustTicket
+create or replace trigger adjustTicket
+  after update of high_price, low_price
+  on Price
+  for each row
+begin
+  update Reservation
+  set cost =  case
+                when cost = :old.low_price and ticketed = 'N' then
+                  :new.low_price
+                when cost = :old.high_price and ticketed = 'N' then
+                  :new.high_price
+                else
+                  111
+              end
+  where :new.departure_city = start_city and :new.arrival_city = end_city;
+end;
+/
