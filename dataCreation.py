@@ -238,6 +238,31 @@ for i in range(0,350):
 	
 	script.write('insert into Reservation_detail values (\'' + str(res_nums[i]) + '\', \'' + str(flt_num) + '\', \'' + str(day) + '-' + mth + '-' + year + '\', ' + str(1) + ');\n')
 	
-print('300 resy detail records generated')
+print('300 resy detail records generated\n')
+
+print('Generating Price data\n')
+
+# -- Price table
+# -- assumes only one flight serves each route
+# create table Price(
+	# departure_city char(3),
+	# arrival_city char(3),
+	# airline_id varchar(5) not null,
+	# high_price int,
+	# low_price int,
+	# constraint price_pk primary key (departure_city, arrival_city),
+	# constraint price_fk foreign key (airline_id) references Airline (airline_id)
+# );
+
+script.write('\n\n--Price sample data\n\n')
+for i in range(0,150):
+	d_city = cities[i%5]
+	a_city = cities[(i+1)%5]
+	
+	airln = (i%10)+1
+	hi_p = random.randint(50,1000)
+	lo_p = hi_p/2
+	
+	script.write('insert into Price values (\'' + d_city + '\', \'' + a_city + '\', \'' + str(airln) + '\', ' + str(hi_p) + ', ' + str(lo_p) + ');\n')
 
 script.close()
