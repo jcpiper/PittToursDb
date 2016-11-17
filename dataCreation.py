@@ -254,15 +254,16 @@ print('Generating Price data\n')
 	# constraint price_fk foreign key (airline_id) references Airline (airline_id)
 # );
 
+
 script.write('\n\n--Price sample data\n\n')
-for i in range(0,150):
+for i in range(0,5):
 	d_city = cities[i%5]
 	a_city = cities[(i+1)%5]
 	
-	airln = (i%10)+1
+	airln = ('001', '002', '003', '004', '005', '006', '007', '008', '009', '010')
 	hi_p = random.randint(50,1000)
 	lo_p = hi_p/2
 	
-	script.write('insert into Price values (\'' + d_city + '\', \'' + a_city + '\', \'' + str(airln) + '\', ' + str(hi_p) + ', ' + str(lo_p) + ');\n')
+	script.write('insert into Price values (\'' + d_city + '\', \'' + a_city + '\', \'' + airln[i%10] + '\', ' + str(hi_p) + ', ' + str(lo_p) + ');\n')
 
 script.close()
