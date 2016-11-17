@@ -182,7 +182,9 @@ create or replace trigger planeUpgrade
 
     isLargestPlane := -1;
     isLargestPlane := is_biggest_plane(planeTypeThisFlight);
-
+		
+		set constraints all deferred;
+		
     if numResThisFlight = plane_capacity AND isLargestPlane = 0
       then
         change_plane_type(planeCapThisFlight, planeTypeThisFlight, thisFlightNum);
