@@ -1,6 +1,9 @@
 import random
 # generate sample_data.sql
 
+mon_str = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12']
+day_str = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28']
+
 # create 200 users
 # each user needs the following:
 #	cid varchar(9)
@@ -26,10 +29,10 @@ lname = ('Johnson', 'Smith', 'Jones', 'Hardy', 'Ward', 'Johnston', 'Sullivan',
 					'Crosby', 'Malkin', 'Peters', 'Palmer', 'Woods', 'Nicholson',
 					'Bates', 'Williams', 'Taylor', 'Burns', 'Brown', 'Miller', 'Davis',
 					'Jackson', 'Thompson')
-	
+
 card_num = [] # should be rand 16 digits
 
-exp_date = ('1-sep-2017', '1-sep-2018', '1-sep-2019')
+exp_date = ("TO_DATE('2017 09 01','YYYY MM DD')", "TO_DATE('2018 09 01','YYYY MM DD')", "TO_DATE('2019 09 01','YYYY MM DD')")
 
 st = ('Main', 'Church', 'Washington', 'Jefferson', 'Fifth', 'Forbes')
 
@@ -71,13 +74,16 @@ for i in range(0,250):
 	card_num.append(random.randint(1000000000000000, 9999999999999999))
 	strn = 'insert into Customer values (\'' + str(ids[len(ids)-1]) + '\',\'' + title[i%len(title)] + '\',\''
 	str2 = fname[i%len(fname)] + '\',\'' + lname[i%len(lname)] + '\', ' + '\'' + str(card_num[len(card_num)-1]) +'\''
-	str3 = ',\'' + exp_date[i%len(exp_date)] + '\',\'' + st[i%len(st)] + '\', \'' + city[i%len(city)]
-	
+	str3 = ',' + exp_date[i%len(exp_date)] + ',\'' + st[i%len(st)] + '\', \'' + city[i%len(city)]
+
 	str4 = '\', \'' + state[i%len(state)] + '\', \'' + str(random.randint(1000000000, 9999999999)) + '\', \'' + fname[i%len(fname)] + '.' + lname[i%len(lname)] + '@gmail.com\', NULL);'
 
 	script.write(strn + str2 + str3 + str4 +'\n')
 
 print('Customers added to script\nNow creating reservations\n')
+
+
+
 
 # create Reservations
 
@@ -115,15 +121,15 @@ for x in range(0,350):
 	res_nums.append(resNum)
 	# id = random.randint(0, len(ids)-1)
 	cost = random.randint(0, 5000)
-	mth = mon[random.randint(0,11)]
-	day = random.randint(1,28)
+	mth = mon_str[random.randint(0,11)]
+	day = day_str[random.randint(0,27)]
 	year = yr[random.randint(0,3)]
-	
-	resy = 'insert into Reservation values (\'' + str(resNum) + '\', \'' + str(ids[x%len(ids)]) + '\', \'' + str(cost) + '\', \'' + str(card_num[x%len(ids)]) + '\', \'' + str(day) + '-' + mth + '-' + year
-	resy2 = '\', \'' + tix[random.randint(0,1)] + '\', \''+ cities[x%len(cities)] + '\', \'' + cities[(x+1)%len(cities)] + '\');'
+
+	resy = 'insert into Reservation values (\'' + str(resNum) + '\', \'' + str(ids[x%len(ids)]) + '\', \'' + str(cost) + '\', \'' + str(card_num[x%len(ids)]) + '\', ' + "TO_DATE('" + year + " " + mth + " " + day + "','YYYY MM DD')"
+	resy2 = ', \'' + tix[random.randint(0,1)] + '\', \''+ cities[x%len(cities)] + '\', \'' + cities[(x+1)%len(cities)] + '\');'
 
 	script.write(resy + resy2 + '\n')
-	
+
 
 print('Reservations added to script\n')
 print('Now adding 10 airlines\n')
@@ -156,7 +162,7 @@ print('Creating 30 sample planes\n')
 
 script.write('\n\n--Plane sample data\n\n')
 
-pln = ('Cessna 172', 'Piper PA-28', 'Cessna 150', 'Cessna 182', 'Piper J-3 Cub', 
+pln = ('Cessna 172', 'Piper PA-28', 'Cessna 150', 'Cessna 182', 'Piper J-3 Cub',
 'Antanov An-2', 'Beechcraft Bonanza')
 
 owner = ('001', '002', '003', '004', '005', '006', '007', '008', '009', '010')
@@ -173,10 +179,10 @@ owner = ('001', '002', '003', '004', '005', '006', '007', '008', '009', '010')
 # );
 plane = 'insert into Plane values ('
 for i in range(0,30):
-	mth = mon[random.randint(0,11)]
-	day = random.randint(1,28)
+	mth = mon_str[random.randint(0,11)]
+	day = day_str[random.randint(0,27)]
 	year = random.randint(1985,2010)
-	script.write(plane + '\'C0' + str(i) + '\', \'Cessna\', ' + str(random.randint(50,250)) + ', \'' + str(day) + '-' + mth + '-' + str(year) + '\', ' + str(random.randint(1965,2010)) + ', \'' + owner[i%len(owner)] + '\');\n')
+	script.write(plane + '\'C0' + str(i) + '\', \'Cessna\', ' + str(random.randint(50,250)) + ', ' + "TO_DATE('" + str(year) + " " + mth + " " + day + "','YYYY MM DD'), " + str(random.randint(1965,2010)) + ', \'' + owner[i%len(owner)] + '\');\n')
 
 print('Planes created\n')
 
@@ -206,7 +212,7 @@ for i in range(0,100):
 	p_tp = i%30
 	d_t = random.randint(100,2359)
 	a_t = d_t + random.randint(100,800)
-	
+
 	x = i + 1
 	if a_id < 10:
 		script.write('insert into Flight values (\'' + str(i) + '\', \'00' + str(a_id) + '\', \'C0' + str(p_tp) + '\', \'' + cities[i%len(cities)] + '\', \'' + cities[x%len(cities)] + '\', \'' + str(d_t) + '\', \'' + str(a_t) + '\', \'' + sched + '\');\n')
@@ -228,16 +234,18 @@ print('Flights created\n')
 	# constraint res_det_flt_fk foreign key (flight_number) references Flight (flight_number)
 # );
 
+
+
 print('Creating 300 reservation details\n')
 script.write('\n\n--Reservation Detail sample data\n\n')
 year = '2017'
 for i in range(0,350):
 	flt_num = i%100
-	mth = mon[random.randint(0,11)]
-	day = random.randint(1,28)
-	
-	script.write('insert into Reservation_detail values (\'' + str(res_nums[i]) + '\', \'' + str(flt_num) + '\', \'' + str(day) + '-' + mth + '-' + year + '\', ' + str(1) + ');\n')
-	
+	mth = mon_str[random.randint(0,11)]
+	day = day_str[random.randint(0,27)]
+
+	script.write('insert into Reservation_detail values (\'' + str(res_nums[i]) + '\', \'' + str(flt_num) + '\', ' + "TO_DATE('" + year + " " + mth + " " + day + "','YYYY MM DD'), " + str(1) + ');\n')
+
 print('300 resy detail records generated\n')
 
 print('Generating Price data\n')
@@ -254,15 +262,22 @@ print('Generating Price data\n')
 	# constraint price_fk foreign key (airline_id) references Airline (airline_id)
 # );
 
+
 script.write('\n\n--Price sample data\n\n')
-for i in range(0,150):
-	d_city = cities[i%5]
-	a_city = cities[(i+1)%5]
-	
-	airln = (i%10)+1
-	hi_p = random.randint(50,1000)
-	lo_p = hi_p/2
-	
-	script.write('insert into Price values (\'' + d_city + '\', \'' + a_city + '\', \'' + str(airln) + '\', ' + str(hi_p) + ', ' + str(lo_p) + ');\n')
+i = 0
+while i < 6:
+    j = 0
+    while j < 6:
+        if i != j:
+        	d_city = cities[i]
+        	a_city = cities[j]
+
+        	airln = owner[random.randint(0,9)]
+        	hi_p = random.randint(50,1000)
+        	lo_p = hi_p/2
+
+        	script.write('insert into Price values (\'' + d_city + '\', \'' + a_city + '\', \'' + str(airln) + '\', ' + str(hi_p) + ', ' + str(lo_p) + ');\n')
+        j = j + 1
+    i = i + 1
 
 script.close()
