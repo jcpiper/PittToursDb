@@ -11,10 +11,11 @@ create or replace procedure switch_plane(flightNo in flight.flight_number%TYPE)-
 		newCap plane.plane_capacity%TYPE;
 	begin
 		-- assign the plane type with minimum viable capacity to var newPlane
-		select plane_type into newPlane
-		from flight_options
-		fetch first row only;
 
+		newPlane := get_alternate_plane(flightNo);
+		
+		dbms_output.Put_line(newPlane); --display value
+		
 		-- assign the capacity of the current plane being used by this flight to var cap
 		select plane_capacity into cap
 		from plane p, flight f
@@ -26,7 +27,7 @@ create or replace procedure switch_plane(flightNo in flight.flight_number%TYPE)-
 		where plane_type = newPlane;
 
 		-- if capacity of newPlane is lower than that of the original plane, make newPlane the plane for the flight
-		if cap < newCap then
+			if cap < newCap then
 			update flight
 			set plane_type = newPlane
 			where flight_number = flightNo;
@@ -61,13 +62,54 @@ create or replace view reservations_per_flight as
 
 
 --get all planes that can hold the ticketed reservations for a given flight
+-- function to get plane that can hold reservations
 
-create or replace view flight_options as
-	select min(p.plane_capacity) "Capacity", p.plane_type
-	from plane p, reservations_per_flight r
-	where p.plane_capacity > r.reservations
-	group by p.plane_type
-	order by "Capacity";
+create or replace function get_alternate_plane (flightNo in varchar2) return char
+	as
+	resys int;
+	pln char(4);
+	begin
+		select reservations into resys
+		from reservations_per_flight
+		where flight_number = flightNo;
+		
+		select plane_type into pln
+		from plane
+		where plane_capacity > resys
+		order by plane_capacity
+		fetch first row only;
+		
+		return (pln);
+	end;
+	/
+	show errors;
+	
+create or replace procedure check_flights(sysTime in date)
+	as
+		cursor flt_cursor is
+			select flight_number
+			from flight
+			where departure_time <= sysTime + 12/24;
+			
+		flt flight.flight_number%TYPE;
+	begin
+		open flt_cursor;
+		loop
+			fetch flt_cursor into flt;
+			delete_reservations(flt);
+			switch_plane(flt);
+			
+			exit when flt_cursor%NOTFOUND;
+		end loop;
+	end;
+	/
+show errors;
+-- Trigger 3
+-- assuming sys-time is updated every hour on the hour
+create or replace trigger cancelReservation
+	after insert on Sys_time
+	
+	--time var
 
 
 -- create or replace view test_view as
@@ -115,3 +157,4 @@ begin
   where :new.departure_city = start_city and :new.arrival_city = end_city;
 end;
 /
+

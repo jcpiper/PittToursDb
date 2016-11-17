@@ -264,6 +264,7 @@ print('Generating Price data\n')
 
 
 script.write('\n\n--Price sample data\n\n')
+<<<<<<< HEAD
 i = 0
 while i < 6:
     j = 0
@@ -281,3 +282,16 @@ while i < 6:
     i = i + 1
 
 script.close()
+=======
+for i in range(0,5):
+	d_city = cities[i%5]
+	a_city = cities[(i+1)%5]
+	
+	airln = ('001', '002', '003', '004', '005', '006', '007', '008', '009', '010')
+	hi_p = random.randint(50,1000)
+	lo_p = hi_p/2
+	
+	script.write('insert into Price values (\'' + d_city + '\', \'' + a_city + '\', \'' + airln[i%10] + '\', ' + str(hi_p) + ', ' + str(lo_p) + ');\n')
+
+script.close()
+>>>>>>> 7b7ca9cfbb77eb85f8475aa3fa71bf8bf8b33812

@@ -40,8 +40,8 @@ create table Flight(
 	arrival_time varchar2(4),
 	weekly_schedule varchar2(7),
 	constraint flight_pk primary key (flight_number),
-	constraint flt_airline_fk foreign key (airline_id) references Airline (airline_id),
-	constraint flt_plane_fk foreign key (plane_type, airline_id) references Plane (plane_type, owner_id)
+	constraint flt_airline_fk foreign key (airline_id) references Airline (airline_id) DEFERRABLE INITIALLY IMMEDIATE,
+	constraint flt_plane_fk foreign key (plane_type, airline_id) references Plane (plane_type, owner_id) DEFERRABLE
 );
 
 -- Price table
