@@ -13,9 +13,9 @@ create or replace procedure switch_plane(flightNo in flight.flight_number%TYPE)-
 		-- assign the plane type with minimum viable capacity to var newPlane
 
 		newPlane := get_alternate_plane(flightNo);
-		
+
 		dbms_output.Put_line(newPlane); --display value
-		
+
 		-- assign the capacity of the current plane being used by this flight to var cap
 		select plane_capacity into cap
 		from plane p, flight f
@@ -72,25 +72,25 @@ create or replace function get_alternate_plane (flightNo in varchar2) return cha
 		select reservations into resys
 		from reservations_per_flight
 		where flight_number = flightNo;
-		
+
 		select plane_type into pln
 		from plane
 		where plane_capacity > resys
 		order by plane_capacity
 		fetch first row only;
-		
+
 		return (pln);
 	end;
 	/
 	show errors;
-	
+
 create or replace procedure check_flights(sysTime in date)
 	as
 		cursor flt_cursor is
 			select flight_number
 			from flight
 			where departure_time <= sysTime + 12/24;
-			
+
 		flt flight.flight_number%TYPE;
 	begin
 		open flt_cursor;
@@ -98,7 +98,7 @@ create or replace procedure check_flights(sysTime in date)
 			fetch flt_cursor into flt;
 			delete_reservations(flt);
 			switch_plane(flt);
-			
+
 			exit when flt_cursor%NOTFOUND;
 		end loop;
 	end;
@@ -108,7 +108,7 @@ show errors;
 -- assuming sys-time is updated every hour on the hour
 create or replace trigger cancelReservation
 	after insert on Sys_time
-	
+
 	--time var
 
 
@@ -158,3 +158,43 @@ begin
 end;
 /
 
+-- Trigger planeUpgrade
+create or replace trigger planeUpgrade
+  before insert on Reservation
+  declare
+    thisFlightNum varchar2(3);
+    numResThisFlight int;
+    planeTypeThisFlight char(4);
+    airlineIdThisFlight varchar2(5);
+    planeCapThisFlight int;
+    isLargestPlane int;
+    flightFull EXCEPTION;
+  begin
+    select flight_number into thisFlightNum from Reservation_detail rD
+    where rD.reservation_number = :old.reservation_number;
+
+    numResThisFlight := resOnFlight(:old.reservation_number);
+
+    planeTypeThisFlight := get_plane_type_for_flight(thisFlightNum);
+
+    airlineIdThisFlight := get_airline_for_flight(thisFlightNum);
+
+    select plane_capacity into planeCapThisFlight from Plane
+    where plane_type = planeTypeThisFlight AND owner_id = airlineIdThisFlight;
+
+    isLargestPlane := -1;
+    isLargestPlane := is_biggest_plane(planeTypeThisFlight);
+
+    if numResThisFlight = plane_capacity AND isLargestPlane = 0
+      then
+        change_plane_type(planeCapThisFlight, planeTypeThisFlight, thisFlightNum);
+    elsif numResThisFlight = plane_capacity AND isLargestPlane = 1
+      then
+        raise flightFull;
+    end if;
+
+  EXCEPTION
+    WHEN flightFull THEN
+       DBMS_OUTPUT.PUT_LINE('Insert Reservation failed - flight is full.');
+  end;
+/
