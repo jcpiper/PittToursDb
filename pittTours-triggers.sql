@@ -105,19 +105,17 @@ create or replace procedure check_flights(sysTime in date)
 	/
 show errors;
 -- Trigger 3
--- assuming sys-time is updated every hour on the hour
+-- assumes sys-time is updated every hour on the hour
 create or replace trigger cancelReservation
 	after insert on Sys_time
+	
+	for each row
+	begin
+		check_flights(:new.c_date);
+	end;
+	/
+show errors;
 
-	--time var
-
-
--- create or replace view test_view as
--- select count(*) as resys
--- from flight f join reservation r on
--- (f.departure_city = r.start_city and f.arrival_city = r.end_city)
--- where r.ticketed = 'Y'
--- group by f.flight_number;
 
 
 -- Returns number of reservations on the same flight as a given reservation num
