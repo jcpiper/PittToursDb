@@ -14,3 +14,18 @@ create or replace function get_next_plane (currPlane in int) return char
 	end;
 	/
 show errors;
+
+create or replace procedure change_plane_type (currPlane in plane.plane_type%TYPE, flightNo in flight.flight_number%TYPE)
+	as
+	
+	nxtPlane char(4) := get_next_plane(currPlane);
+	
+	begin
+		update flight
+		set plane_type = nxtPlane
+		where flight_number = flightNo;
+		
+		commit;
+	end;
+	/
+show errors;
