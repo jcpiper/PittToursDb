@@ -78,6 +78,24 @@ create or replace view flight_options as
 -- group by f.flight_number;
 
 
+-- Returns number of reservations on the same flight as a given reservation num
+create or replace function resOnFlight(resNum in varchar2)
+  return int
+  is
+  this_flight varchar2(3);
+  on_flight int;
+  begin
+    select flight_number into this_flight
+    from Reservation_detail rD
+    where rD.reservation_number = resNum;
+
+    select count(*) into on_flight
+    from Reservation_detail
+    where flight_number = this_flight;
+
+    return on_flight;
+  end;
+
 
 -- Trigger adjustTicket
 create or replace trigger adjustTicket
