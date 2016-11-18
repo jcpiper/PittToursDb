@@ -299,6 +299,7 @@ create or replace function get_airline_for_flight (resy in varchar2) return varc
 	/
 show errors;
 
+-- returns 1 if this is the plane with the largest capacity, otherwise returns 0
 create or replace function is_biggest_plane (plnType in char) return int
 	as
 	cap int;
