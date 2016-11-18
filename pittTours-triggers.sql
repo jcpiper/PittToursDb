@@ -185,17 +185,20 @@ create or replace trigger planeUpgrade
 
 		--set constraints all deferred;
 
-    if numResThisFlight >= planeCapThisFlight AND isLargestPlane = 0
+    if numResThisFlight = planeCapThisFlight AND isLargestPlane = 0
       then
         change_plane_type(planeCapThisFlight, planeTypeThisFlight, thisFlightNum);
-    elsif numResThisFlight = planeCapThisFlight AND isLargestPlane = 1
+		end if;
+    if numResThisFlight >= planeCapThisFlight AND isLargestPlane = 1
       then
         raise flightFull;
     end if;
 
+
   EXCEPTION
     WHEN flightFull THEN
        DBMS_OUTPUT.PUT_LINE('Insert Reservation failed - flight is full.');
+			 raise;
   end;
 /
 show errors;
