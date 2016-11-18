@@ -168,7 +168,8 @@ create or replace trigger planeUpgrade
     flightFull EXCEPTION;
   begin
     select flight_number into thisFlightNum from Flight f
-    where f.departure_city = :new.start_city AND f.arrival_city = :new.end_city;
+    where f.departure_city = :new.start_city AND f.arrival_city = :new.end_city
+		fetch first row only;
 
     numResThisFlight := resOnFlight(thisFlightNum);
 
@@ -184,7 +185,7 @@ create or replace trigger planeUpgrade
 
 		--set constraints all deferred;
 
-    if numResThisFlight = planeCapThisFlight AND isLargestPlane = 0
+    if numResThisFlight >= planeCapThisFlight AND isLargestPlane = 0
       then
         change_plane_type(planeCapThisFlight, planeTypeThisFlight, thisFlightNum);
     elsif numResThisFlight = planeCapThisFlight AND isLargestPlane = 1
@@ -261,7 +262,7 @@ create or replace procedure change_plane_type (currPlane in plane.plane_capacity
 			set airline_id = nxtAirline
 			where flight_number = flightNo;
 		end if;
-		commit;
+		-- commit;
 	end;
 	/
 show errors;
