@@ -22,10 +22,19 @@ public class pittToursAdmin {
 				System.out.println("You have chosen to erase the database.");
 				break;
 			case "2":
-				System.out.println("You have chosen to load airline info");
+				System.out.println("You have chosen to load airline info.");
 				break;
 			case "3":
-				System.out.println("You have chosen to load schedule info");
+				System.out.println("You have chosen to load schedule info.");
+				break;
+			case "4":
+				System.out.println("You have chosen to load pricing info.");
+				break;
+			case "5":
+				System.out.println("You have chosen to load plane info.");
+				break;
+			case "6":
+				System.out.println("You have chosen to generate passenger manifest for specific flight on given day.");
 				break;
 			default:
 				System.out.println("Invalid option, choose again");
