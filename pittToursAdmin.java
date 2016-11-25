@@ -1,5 +1,5 @@
 /*
-/ Administrator interface for pittTours
+* Administrator interface for pittTours
 */
 import java.io.*;
 
