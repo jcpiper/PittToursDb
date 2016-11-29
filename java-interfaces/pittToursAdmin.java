@@ -130,7 +130,65 @@ public class pittToursAdmin {
 	public static void loadPricing() throws IOException {
 		System.out.println("Preparing to load pricing information.");
 		BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
-		System.out.println("Please enter the file name where the pricing info is stored.");
+		System.out.println("\nWould you like to LOAD PRICING INFORMATION or CHANGE THE PRICE OF AN EXISTING FLIGHT?");
+		System.out.println("Enter \"L\" to load pricing info");
+		System.out.println("Enter \"C\" to change the price of a flight");
+		String choice = input.readLine().toUpperCase();
+		switch (choice) {
+			case "L":
+				// input.close();
+				loadPriceData();
+				break;
+			case "C":
+				// input.close();
+				changePriceData();
+				break;
+			default:
+				System.out.println("ERROR: Invalid input! Options are \"L\" or \"C\"!");
+				loadPricing();
+				break;
+		}
+	}
+	public static void changePriceData() throws IOException {
+		BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
+		System.out.println("\nPlease enter the departure city for the flight. E.G. \"CHI\"");
+		System.out.println("Waiting for input...");
+		String depCity = input.readLine().toUpperCase();
+		if (depCity.length() > 3) {
+			input.close();
+			System.out.println("ERROR. City name was too long. Expecting a 2 or 3 character abbreviation like \"NY\" or \"CHI\"");
+			System.exit(1);
+		}
+		System.out.println("Departure City: " + depCity);
+		
+		System.out.println("\nPlease enter the destination city for the flight. E.G. \"PIT\"");
+		System.out.println("Waiting for input...");
+		String arrCity = input.readLine().toUpperCase();
+		if (arrCity.length() > 3) {
+			input.close();
+			System.out.println("ERROR. City name was too long. Expecting a 2 or 3 character abbreviation like \"NY\" or \"CHI\"");
+			System.exit(1);
+		}
+		System.out.println("Destination City: " + arrCity);
+		
+		System.out.println("\nPlease eneter the new high price for the flight.");
+		System.out.println("Waiting for input...");
+		int hiPrice = Integer.valueOf(input.readLine());
+		
+		System.out.println("High Price: $" + hiPrice);
+		
+		System.out.println("\nPlease eneter the new low price for the flight.");
+		System.out.println("Waiting for input...");
+		int loPrice = Integer.valueOf(input.readLine());
+		
+		System.out.println("Low Price: $" + loPrice);
+		input.close();
+		// call changePrice with params depCity, arrCity, hiPrice, loPrice
+	}
+	public static void loadPriceData() throws IOException {
+		BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
+		System.out.println("\nPlease enter the file name where the pricing info is stored.");
+		System.out.println("Waiting for input...");
 		File file = new File(input.readLine());
 		
 		// open file to check format of file
@@ -191,12 +249,9 @@ public class pittToursAdmin {
 		String flightNum = input.readLine();
 		System.out.println("Please enter the desired date.");
 		String flightDate = input.readLine();
-		// call procedure and print results
-		/*
-			select customer info from join of customer, reservation, res_detail
-			select c.salutation, c. firstName, c.lastName
-			from Customer c, Reservation r, Reservation_Detail d
-			where r. reservation_number = d.reservation_number and c.cid = r.cid and d.flight_number = flightNum and d.date = flightDate;
-		*/
+		// create and execute query on passengers_on_flight view (in admin-procedures.sql), then print results
+		
+		String query = "select salutation, first_name, last_name from passengers_on_flight where flight_number = " + flightNum + " and flight_date = " + flightDate;
+		// execute query
 	}
 }
