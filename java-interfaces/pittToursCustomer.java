@@ -191,8 +191,9 @@ public class pittToursCustomer {
 		
 		String connectionsQuery = "Select f.flight_number, f.departure_city, f.departure_time, f.arrival_time, s.flight_number, s.departure_city, s.departure_time, s.arrival_time " +
 															"from flight f join flight s on f.arrival_city = s.departure_city " +
-															"where f.departure_city = " + depCity + " and s.arrival_city = " + arrCity;
+															"where f.departure_city = " + depCity + " and s.arrival_city = " + arrCity + " and f.schedule = s.schedule";
 		// execute both queries and print results
+		// schedule comparison could use improvement to get more results
 	}
 
   /* 5. findRoutesByAirline */
