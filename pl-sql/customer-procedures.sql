@@ -70,5 +70,3 @@ create or replace function getRoundTripPrice(startCity in varchar2, destCity in 
 		return rndPrice;
 	end;
 	/
-	
-	

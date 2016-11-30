@@ -184,8 +184,15 @@ public class pittToursCustomer {
     input.close();
 
     // Call SQL/PL, print all possible one way routes
-
-    // Find routes with a connection
+		// print flight number, departure, city, departure time, and arrival time
+		String directRoutesQuery = "select flight_number, departure_city, departure_time, arrival_time " +
+										"from flight " +
+										"where departure_city = " + depCity + " and arrival_city = " + arrCity;
+		
+		String connectionsQuery = "Select f.flight_number, f.departure_city, f.departure_time, f.arrival_time, s.flight_number, s.departure_city, s.departure_time, s.arrival_time " +
+															"from flight f join flight s on f.arrival_city = s.departure_city " +
+															"where f.departure_city = " + depCity + " and s.arrival_city = " + arrCity;
+		// execute both queries and print results
 	}
 
   /* 5. findRoutesByAirline */
