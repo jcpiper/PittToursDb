@@ -141,9 +141,20 @@ public class pittToursAdmin {
 			String[] vals = line.split(",");
 			String com = ", ";
 			// expecting array like ["001", "United Airlines", "UAL", "Chicago", "1931"]
-			line = vals[0].concat(com).concat(vals[1]).concat(com).concat(vals[2]).concat(com).concat(vals[4]);
+			line = "\'".concat(vals[0]).concat("\', \'").concat(vals[1]).concat("\', \'").concat(vals[2]).concat("\', ").concat(vals[4]);
 			System.out.println("params: " + line);
 			// replace previous line with call to loadPlane procedure in pl/sql with line string as params;
+			String query = "insert into airline values (" + line + ")";
+			try{
+				PreparedStatement insrt = conn.prepareStatement(query);
+				
+				int rows = insrt.executeUpdate();
+				System.out.println(rows + " rows updated.");
+				insrt.close();
+			} catch (SQLException e) {
+				System.out.println("Insert Failed!");
+				e.printStackTrace();
+			}
 		}
 		input.close();
 		csv.close();
@@ -171,9 +182,23 @@ public class pittToursAdmin {
 		csv = new BufferedReader(new FileReader(file));
 		while (csv.ready()) {
 			String line = csv.readLine();
-			line = line.replaceAll(",", ", ");
+			// format string for insertion into db
+			line = line.replaceAll(",", "\', \'");
+			line = "\'" + line + "\'";
 			System.out.println("Params: " + line);
 			// delete print statement and call loadSchedule procedure
+			String query = "insert into flight values (" + line + ")";
+			
+			try {
+				PreparedStatement insrt = conn.prepareStatement(query);
+				
+				int rows = insrt.executeUpdate();
+				System.out.println(rows + " rows updated.");
+				insrt.close();
+			} catch (SQLException e) {
+				System.out.println("Insert Failed!");
+				e.printStackTrace();
+			}
 		}		
 	}
 	
@@ -232,6 +257,20 @@ public class pittToursAdmin {
 		System.out.println("Low Price: $" + loPrice);
 		input.close();
 		// call changePrice with params depCity, arrCity, hiPrice, loPrice
+		String query = "update price" +
+									" set low_price = " + loPrice + ", high_price = " + hiPrice +
+									" where departure_city = \'" + depCity + "\' and arrival_city = \'" + arrCity + "\'";
+			try {
+				PreparedStatement updt = conn.prepareStatement(query);
+				
+				int rows = updt.executeUpdate();
+				System.out.println(rows + " rows updated.");
+				updt.close();
+			} catch (SQLException e) {
+				System.out.println("Update Failed!");
+				e.printStackTrace();
+			}
+		
 	}
 	public static void loadPriceData(Connection conn) throws IOException {
 		BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
@@ -255,9 +294,24 @@ public class pittToursAdmin {
 		csv = new BufferedReader(new FileReader(file));
 		while (csv.ready()) {
 			String line = csv.readLine();
-			line = line.replaceAll(",", ", ");
+			// line = line.replaceAll(",", ", ");
+			String[] vals = line.split(",");
+			line = "\'" + vals[0] + "\', \'" + vals[1] + "\', \'" + vals[2] + "\', " + vals[3] + ", " + vals[4];
 			System.out.println("Params: " + line);
 			// delete print statement and call loadPricing procedure
+			String query = "insert into price values (" + line + ")";
+			
+			try {
+				PreparedStatement insrt = conn.prepareStatement(query);
+				
+				int rows = insrt.executeUpdate();
+				System.out.println(rows + " rows updated.");
+				insrt.close();
+			} catch (SQLException e) {
+				System.out.println("Update Failed!");
+				e.printStackTrace();
+			}
+			
 		}
 	}
 	
@@ -273,8 +327,8 @@ public class pittToursAdmin {
 		int lineNum = 0;
 		while (csv.ready()) {
 			lineNum++;
-			if (csv.readLine().split(",").length != 5) {
-				System.out.println("\n\nERROR! File is not properly formatted. Error at line " + lineNum + ". Expecting a csv file with 5 entries per line.\n\n**EXAMPLE**:\tB737,Boeing 125,09/09/2009,1996,001");
+			if (csv.readLine().split(",").length != 6) {
+				System.out.println("\n\nERROR! File is not properly formatted. Error at line " + lineNum + ". Expecting a csv file with 6 entries per line.\n\n**EXAMPLE**:\tB737,Boeing,125,09/09/2009,1996,001");
 				csv.close();
 				System.exit(1); // exit the program
 			}
@@ -284,9 +338,26 @@ public class pittToursAdmin {
 		csv = new BufferedReader(new FileReader(file));
 		while (csv.ready()) {
 			String line = csv.readLine();
-			line = line.replaceAll(",", ", ");
+			// line = line.replaceAll(",", ", ");
+			String[] vals = line.split(",");
+			
 			System.out.println("Params: " + line);
 			// delete print statement and call loadPlane procedure
+			
+			line = "\'" + vals[0] + "\', \'" + vals[1] + "\', " + vals[2] + ", TO_DATE(\'" + vals[3] + "\', \'mm/dd/yyyy\'), " + vals[4] + ", \'" + vals[5] + "\'";
+			
+			String query = "insert into plane values (" + line + ")";
+			
+			try {
+				PreparedStatement insrt = conn.prepareStatement(query);
+				
+				int rows = insrt.executeUpdate();
+				System.out.println(rows + " rows updated.");
+				insrt.close();
+			} catch (SQLException e) {
+				System.out.println("Update Failed!");
+				e.printStackTrace();
+			}
 		}
 	}
 	
@@ -295,11 +366,34 @@ public class pittToursAdmin {
 		BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
 		System.out.println("Please enter the flight number of the desired flight.");
 		String flightNum = input.readLine();
-		System.out.println("Please enter the desired date.");
+		System.out.println("Please enter the desired date in the format dd-mmm-yyyy.");
 		String flightDate = input.readLine();
 		// create and execute query on passengers_on_flight view (in admin-procedures.sql), then print results
 		
-		String query = "select salutation, first_name, last_name from passengers_on_flight where flight_number = " + flightNum + " and flight_date = " + flightDate;
+		/*
+		*	Might need to change date format
+		*/
+		String query = "select salutation, first_name, last_name from passengers_on_flight where flight_number = \'" + flightNum + "\' and flight_date = \'" + flightDate + "\'";
 		// execute query
+		
+		try {
+				PreparedStatement srch = conn.prepareStatement(query);
+				
+				ResultSet rs = srch.executeQuery();
+				System.out.println("Title\tFirst name\tLast name");
+				System.out.println("----------------------------------");
+				String title, fName, lName;
+				while (rs.next()) {
+					title = rs.getString(1);
+					fName = rs.getString(2);
+					lName = rs.getString(3);
+					
+					System.out.println(title + "\t" + fName + "\t" + lName);
+				}
+				srch.close();
+			} catch (SQLException e) {
+				System.out.println("Update Failed!");
+				e.printStackTrace();
+			}
 	}
 }
