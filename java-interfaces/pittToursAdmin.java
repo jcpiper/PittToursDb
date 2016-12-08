@@ -17,36 +17,36 @@ public class pittToursAdmin {
 		BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
 		System.out.println("\n\nPlease enter the option number of your desired action. i.e. to erase the database, enter \"1\"");
 		String option = input.readLine();
-		switch (option) {
-			case "1": 
-				System.out.println("You have chosen to erase the database.");
-				eraseDb();
-				break;
-			case "2":
-				System.out.println("You have chosen to load airline info.");
-				loadAirline();
-				break;
-			case "3":
-				System.out.println("You have chosen to load schedule info.");
-				loadSchedule();
-				break;
-			case "4":
-				System.out.println("You have chosen to load pricing info.");
-				loadPricing();
-				break;
-			case "5":
-				System.out.println("You have chosen to load plane info.");
-				loadPlane();
-				break;
-			case "6":
-				System.out.println("You have chosen to generate passenger manifest for specific flight on given day.");
-				generatePassengerList();
-				break;
-			default:
-				System.out.println("Invalid option, choose again");
-				String[] params = args;
-				main(params);
-				break;
+	
+		if (option.equals("1")) {
+			System.out.println("You have chosen to erase the database.");
+			eraseDb();
+		}
+			
+		else if (option.equals("2")) {
+			System.out.println("You have chosen to load airline info.");
+			loadAirline();
+		}
+		else if (option.equals("3")) {
+			System.out.println("You have chosen to load schedule info.");
+			loadSchedule();
+		}
+		else if (option.equals("4")) {
+			System.out.println("You have chosen to load pricing info.");
+			loadPricing();
+		}
+		else if (option.equals("5")) {
+			System.out.println("You have chosen to load plane info.");
+			loadPlane();
+		}
+		else if (option.equals("6")) {
+			System.out.println("You have chosen to generate passenger manifest for specific flight on given day.");
+			generatePassengerList();
+		}
+		else {
+			System.out.println("Invalid option, choose again");
+			String[] params = args;
+			main(params);
 		}
 	}
 	
@@ -54,7 +54,7 @@ public class pittToursAdmin {
 		System.out.println("Are you sure you want to erase the database?\ny/n");
 		BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
 		String confirm = input.readLine();
-		input.close();
+		
 		if (confirm.equals("y")) {
 			System.out.println("Erasing the database.");
 			//call eraseDb procedure from pl/sql
@@ -134,20 +134,18 @@ public class pittToursAdmin {
 		System.out.println("Enter \"L\" to load pricing info");
 		System.out.println("Enter \"C\" to change the price of a flight");
 		String choice = input.readLine().toUpperCase();
-		switch (choice) {
-			case "L":
-				// input.close();
-				loadPriceData();
-				break;
-			case "C":
-				// input.close();
-				changePriceData();
-				break;
-			default:
-				System.out.println("ERROR: Invalid input! Options are \"L\" or \"C\"!");
-				loadPricing();
-				break;
+		if (choice.equals("L")) {
+			// input.close();
+			loadPriceData();
 		}
+		else if(choice.equals("C")) {
+			// input.close();
+			changePriceData();
+		}
+		else {
+			System.out.println("ERROR: Invalid input! Options are \"L\" or \"C\"!");
+			loadPricing();
+		}			
 	}
 	public static void changePriceData() throws IOException {
 		BufferedReader input = new BufferedReader(new InputStreamReader(System.in));

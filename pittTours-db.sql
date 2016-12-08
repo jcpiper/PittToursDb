@@ -27,7 +27,7 @@ create table Plane(
 	year int,
 	owner_id varchar2(5) not null,
 	constraint plane_pk primary key (plane_type, owner_id),
-	constraint plane_fk foreign key (owner_id) references Airline (airline_id)
+	constraint plane_fk foreign key (owner_id) references Airline (airline_id) on delete cascade
 );
 
 create table Flight(
@@ -40,8 +40,8 @@ create table Flight(
 	arrival_time varchar2(4),
 	weekly_schedule varchar2(7),
 	constraint flight_pk primary key (flight_number),
-	constraint flt_airline_fk foreign key (airline_id) references Airline (airline_id) DEFERRABLE INITIALLY IMMEDIATE,
-	constraint flt_plane_fk foreign key (plane_type, airline_id) references Plane (plane_type, owner_id) DEFERRABLE
+	constraint flt_airline_fk foreign key (airline_id) references Airline (airline_id) on delete cascade DEFERRABLE INITIALLY IMMEDIATE,
+	constraint flt_plane_fk foreign key (plane_type, airline_id) references Plane (plane_type, owner_id) on delete cascade DEFERRABLE
 );
 
 -- Price table
@@ -53,7 +53,7 @@ create table Price(
 	high_price int,
 	low_price int,
 	constraint price_pk primary key (departure_city, arrival_city),
-	constraint price_fk foreign key (airline_id) references Airline (airline_id)
+	constraint price_fk foreign key (airline_id) references Airline (airline_id) on delete cascade
 );
 
 
@@ -86,7 +86,7 @@ create table Reservation(
 	start_city char(3),
 	end_city char(3),
 	constraint reservation_pk primary key (reservation_number),
-	constraint reservation_fk foreign key (cid) references Customer (cid)
+	constraint reservation_fk foreign key (cid) references Customer (cid) on delete cascade
 	-- constraint reservation_price_fk foreign key (start_city, end_city) references Price (departure_city, arrival_city)
 );
 
@@ -98,8 +98,8 @@ create table Reservation_detail(
 	flight_date date,
 	leg int,
 	constraint res_detail_pk primary key (reservation_number, leg),
-	constraint res_detail_fk foreign key (reservation_number) references Reservation (reservation_number),
-	constraint res_det_flt_fk foreign key (flight_number) references Flight (flight_number)
+	constraint res_detail_fk foreign key (reservation_number) references Reservation (reservation_number) on delete cascade,
+	constraint res_det_flt_fk foreign key (flight_number) references Flight (flight_number) on delete cascade
 );
 
 -- time info table
