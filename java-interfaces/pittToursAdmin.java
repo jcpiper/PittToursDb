@@ -29,21 +29,6 @@ public class pittToursAdmin {
 
 		System.out.println("Oracle JDBC Driver Registered!");
 
-		// Statement stmt = null;
-		// String query = "Select * from flight";
-		
-		// try {
-			// stmt = conn.createStatement();
-			// ResultSet rs = stmt.executeQuery(query);
-			
-			// System.out.println("Query made!");
-			
-			// stmt.close();
-		// } catch (SQLException e) {
-			// System.out.println("Query failed!");
-			// e.printStackTrace();
-			// return;
-		// } 
 		
 		System.out.println("Welcome! Please select an option to proceed.");
 		System.out.println("1. Erase database.");

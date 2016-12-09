@@ -57,5 +57,43 @@ create or replace view passengers_on_flight as
 	select c.salutation, c.first_name, c.last_name, d.flight_date, d.flight_number
 	from customer c, reservation r, reservation_detail d
 	where r.reservation_number = d.reservation_number and c.cid = r.cid;
-
 	
+-- select flights that have at least 1 identical day in schedule
+-- schedule of the form 'SMTWTFS'
+-- create or replace view same_day_flights as
+	-- select f.*, s.* from flight f, flight s
+	-- where (f.weekly_schedule like 'S%' and s.weekly_schedule like 'S%') or
+		-- (f.weekly_schedule like '-M%' and s.weekly_schedule like '-M%') or
+		-- (f.weekly_schedule like '--T%' and s.weekly_schedule like '--T%') or
+		-- (f.weekly_schedule like '%W%' and s.weekly_schedule like '%W%') or
+		-- (f.weekly_schedule like '----T--' and s.weekly_schedule like '----T--') or
+		-- (f.weekly_schedule like '%F-' and s.weekly_schedule like '%F-') or
+		-- (f.weekly_schedule like '------S' and s.weekly_schedule like '------S');
+
+create or replace view sunday_flights as
+	select * from flight
+	where weekly_schedule like 'S%';
+
+create or replace view monday_flights as
+	select * from flight
+	where weekly_schedule like '-M%';
+	
+create or replace view tuesday_flights as
+	select * from flight
+	where weekly_schedule like '--T%';
+	
+create or replace view wednesday_flights as
+	select * from flight
+	where weekly_schedule like '%W%';
+
+create or replace view thursday_flights as
+	select * from flight
+	where weekly_schedule like '----T--';
+	
+create or replace view friday_flights as
+	select * from flight
+	where weekly_schedule like '%F-';
+	
+create or replace view saturday_flights as
+	select * from flight
+	where weekly_schedule like '%S';
