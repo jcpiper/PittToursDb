@@ -97,3 +97,8 @@ create or replace view friday_flights as
 create or replace view saturday_flights as
 	select * from flight
 	where weekly_schedule like '%S';
+	
+-- create or replace view same_day_flights as
+	-- select f.flight_number, s.flight_number
+	-- from flight f, flight s
+	-- where 
