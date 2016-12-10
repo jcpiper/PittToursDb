@@ -599,7 +599,7 @@ public class pittToursCustomer {
       depDates.add(date);
     }
 
-    input.close();
+    // input.close();
 
     // Verify legs, seats, date, generate res # and confirmation/error message.
 
@@ -613,11 +613,41 @@ public class pittToursCustomer {
       System.out.println("Reservation Number:");
       String resNum = input.readLine();
 
-      input.close();
+      // input.close();
 
       // Call SQL/PL, print all flights for this reservation number, print error otherwise
+			String query = "select distinct flight_number from reservation_detail where reservation_number = \'" + resNum + "\'";
+			
+			try {
+				PreparedStatement getFlights = conn.prepareStatement(query);
+				ResultSet flights = getFlights.executeQuery();
+				
+				//check that query is not empty
+				if (!flights.next()) {
+					System.out.println("Error. There are no reservations matching the given reservatio number!");
+					return;
+				}
+				
+				System.out.println("Flights for this reservation:");
+				System.out.println("Flight Number");
+				System.out.println("-------------");
+				//debugging output
+				// System.out.println("Current row: " + flights.getRow());
+				// System.out.println("Has another row? " + flights.next());
+				
+				do {
+					System.out.println("Now at row " + flights.getRow());
+					System.out.println("Flight: " + flights.getString(1));
+				} while(flights.next());
+			} catch(SQLException e) {
+				System.out.println("Query Failed!");
+				e.printStackTrace();
+				return;
+			}
   	}
-
+/*
+* ^^^ NEEDS TESTING ^^^
+*/
 
   /* 10. buyTicket */
 
