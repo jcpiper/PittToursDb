@@ -436,7 +436,61 @@ public class pittToursCustomer {
 
 		System.out.println("Airline: " + airline);
 
-		input.close();
+		// input.close();
+		
+		// print flight number, departure, city, departure time, and arrival time
+		String directRoutesQuery = "select flight_number, departure_city, departure_time, arrival_time " +
+										"from flight f join airline a on f.airline_id = a.airline_id " +
+										"where f.departure_city = \'" + depCity + "\' and f.arrival_city = \'" + arrCity + "\' and a.airline_name = \'" + airline + "\'";
+		
+		// connections query
+		// needs work!
+		String connectionsQuery = "Select f.flight_number, f.departure_city, f.arrival_city, f.departure_time, f.arrival_time, f.weekly_schedule, f.airline_id, s.flight_number, s.departure_city, s.arrival_city, s.departure_time, s.arrival_time, s.weekly_schedule, s.airline_id " +
+															"from flight f join flight s on f.arrival_city = s.departure_city " +
+															"where f.departure_city = \'" + depCity + "\' and s.arrival_city = \'" + arrCity + "\' and f.airline_id = s.airline_id and " + 
+															"exists (select * from airline where airline.airline_name = \'" + airline + "\' and f.airline_id = airline.airline_id)";													
+		// execute both queries and print results
+		try {
+			PreparedStatement query1 = conn.prepareStatement(directRoutesQuery);
+			PreparedStatement query2 = conn.prepareStatement(connectionsQuery);
+			ResultSet dirRoutes = query1.executeQuery();
+			ResultSet conRoutes = query2.executeQuery();
+			
+			System.out.println("All Routes between " + depCity + " and " + arrCity);
+			System.out.println("Flight Number\tDeparture Time\tArrival Time\tDeparture City\tArrival City");
+			while(dirRoutes.next()) {
+				System.out.println(dirRoutes.getString(1) + "\t" + dirRoutes.getString(3) + "\t" + dirRoutes.getString(4) + "\t" + depCity + "\t" + arrCity);
+			}
+			
+			System.out.println("Printing all routes with 1 connection");
+			
+			while(conRoutes.next()) {
+				// check the flights have at least 1 day in common on schedule
+				String sched1 = conRoutes.getString(6);
+				String sched2 = conRoutes.getString(12);
+				boolean aligned = false;
+				
+				for (int i=0; i < 7; i++) {
+					if (sched1.charAt(i) != '-'){
+							aligned = (sched1.charAt(i) == sched2.charAt(i));
+						if (aligned)
+							break;
+					}
+				}
+				if(aligned) {
+					System.out.println(conRoutes.getString(1) + " " + conRoutes.getString(2) + " " + conRoutes.getString(3) + " " + conRoutes.getString(4) + " " +
+						conRoutes.getString(5) + " " + conRoutes.getString(6) + " " +
+						conRoutes.getString(7) + " " + conRoutes.getString(8) + " " + conRoutes.getString(9) + " " + conRoutes.getString(10) + " " + conRoutes.getString(11) + " " + conRoutes.getString(12));
+				}
+				
+			}
+			query1.close();
+			query2.close();
+		} catch(SQLException e) {
+			System.out.println("Queries failed");
+			e.printStackTrace();
+			return;
+		}
 
     // SQL/PL Find routes by airline
 	}
