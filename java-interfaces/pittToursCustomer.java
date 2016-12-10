@@ -546,7 +546,7 @@ public class pittToursCustomer {
 		*/
 		String directQuery = "select f.flight_number, f.departure_city, f.departure_time, f.arrival_time " +
 													"from flight f " +
-													"where and f.departure_city = \'" + depCity + "\' and f.arrival_city = \'" + arrCity + "\' and " +
+													"where f.departure_city = \'" + depCity + "\' and f.arrival_city = \'" + arrCity + "\' and " +
 													"(select max(plane_capacity) from plane) > (select count(*) from reservation_detail where flight_number = f.flight_number " +
 													" and flight_date = \'" + date + "\') ";
 									
@@ -570,7 +570,7 @@ public class pittToursCustomer {
 				System.out.println(dirRoutes.getString(1) + "\t" + dirRoutes.getString(2) + "\t" + dirRoutes.getInt(3) + "\t" + dirRoutes.getInt(4));
 			}
 			while(conRoutes.next()){
-				System.out.println(dirRoutes.getString(1) + "\t" + dirRoutes.getString(2) + "\t" + dirRoutes.getInt(3) + "\t" + dirRoutes.getInt(4));
+				System.out.println(conRoutes.getString(1) + "\t" + conRoutes.getString(2) + "\t" + conRoutes.getInt(3) + "\t" + conRoutes.getInt(4));
 			}
 			query1.close();
 			query2.close();
