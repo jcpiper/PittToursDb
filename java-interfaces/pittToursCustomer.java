@@ -698,11 +698,113 @@ public class pittToursCustomer {
       flightNumbers.add(flightNum);
       depDates.add(date);
     }
-
+		String maxSeatsQuery = "select max(plane_capacity) from plane";
+		int maxSeats = 0;
+		try{
+			PreparedStatement findMax = conn.prepareStatement(maxSeatsQuery);
+			ResultSet rs = findMax.executeQuery();
+			
+			if(rs.next()){
+				maxSeats = rs.getInt(1);
+			}
+		} catch(SQLException e) {
+			System.out.println("Failed to find max seating available");
+			e.printStackTrace();
+			return;
+		}
+		
+		if(!(maxSeats > 0)) {
+			System.out.println("Something went wrong!");
+			return;
+		}
+		
+		for (int i = 0; i < flightNumbers.size(); i++) {
+			String seatsQuery = "select count(*) from reservation_detail where flight_number = \'" + flightNumbers.get(i) + "\' and flight_date = \'" + depDates.get(i) + "\'";
+			
+			try{
+				PreparedStatement search = conn.prepareStatement(seatsQuery);
+				
+				ResultSet seats = search.executeQuery();
+				if (seats.next()) {
+					if (!(seats.getInt(1) < maxSeats)){
+						System.out.println("Flight Number " + flightNumbers.get(i) + " is already full! Action aborted.");
+						return;
+					}
+				}
+			} catch(SQLException e) {
+				System.out.println("ERROR! Query Failed.");
+				e.printStackTrace();
+				return;
+			}
+		}
+		
+		//generate new reservation_number
+		String maxResQuery = "select max(reservation_number) from reservation";
+		int newRes = 0;
+		try{
+			PreparedStatement getRes = conn.prepareStatement(maxResQuery);
+			ResultSet reservationNum = getRes.executeQuery();
+			
+			if(reservationNum.next()) {
+				newRes = reservationNum.getInt(1) + 1;
+			}
+		} catch(SQLException e) {
+			System.out.println("Failed to generate new Reservation Number");
+			e.printStackTrace();
+			return;
+		}
+		
+		//get user cid to add reservation
+		System.out.println("CONFIRMATION: Please enter your PittRewards number to complete your reservation");
+		String cid = input.readLine();
+	
+	
+		String resyGen = "insert into reservation (reservation_number, cid) values (\'" + newRes + "\', \'" + cid + "\')";
+		try {
+			PreparedStatement createRes = conn.prepareStatement(resyGen);
+			int rowsChanged = createRes.executeUpdate();
+			if (rowsChanged != 1) {
+				System.out.println("Failed to create reservation!");
+				return;
+			}
+		} catch(SQLException e) {
+			System.out.println("Insertion failed!");
+			e.printStackTrace();
+			return;
+		}
+		for (int n = 0; n < flightNumbers.size(); n++) {
+			String insertSql = "insert into reservation_detail values (\'" + newRes + "\', \'" + flightNumbers.get(n) + "\', \'" + depDates.get(n) + "\', " + n+1 + ")";
+			
+			try {
+				PreparedStatement resDetail = conn.prepareStatement(insertSql);
+				int rowsInserted = resDetail.executeUpdate();
+				if(rowsInserted != 1) {
+					System.out.println("Failed to add flight " + flightNumbers.get(n) + " to reservation");
+					return;
+				}
+			} catch(SQLException e) {
+				System.out.println("Insertion Failed.");
+				e.printStackTrace();
+				return;
+			}
+		}
     // input.close();
-
+		System.out.println("\nAction completed! Your reservation number is " + newRes);
     // Verify legs, seats, date, generate res # and confirmation/error message.
-		main(new String[1]);
+		while(true){
+			System.out.println("\nWould you like to complete another action?");
+			System.out.println("Y/N");
+			String choice = input.readLine().toUpperCase();
+			if(choice.equals("Y"))
+				main(new String[1]);
+			else if(choice.equals("N"))
+				System.exit(0);
+			else {
+				System.out.println("INVALID OPTION\n");
+			}
+		}
+		
+		
 	}
 
   /* 9. showResInfo */
