@@ -375,7 +375,12 @@ public class pittToursCustomer {
 			findRoutes(conn);
 		}
 		System.out.println("Destination City: " + arrCity);
-
+		
+		findRoutesQuery(conn, depCity, arrCity);
+		main(new String[1]);
+	}
+	
+	public static void findRoutesQuery(Connection conn, String depCity, String arrCity) {
     // Call SQL/PL, print all possible one way routes
 		// print flight number, departure, city, departure time, and arrival time
 		String directRoutesQuery = "select flight_number, departure_city, departure_time, arrival_time " +
@@ -422,13 +427,15 @@ public class pittToursCustomer {
 				
 			}
 			query1.close();
+			dirRoutes.close();
 			query2.close();
+			conRoutes.close();
 		} catch(SQLException e) {
 			System.out.println("Queries failed");
 			e.printStackTrace();
 			return;
 		}
-		main(new String[1]);
+		return;
 		// schedule comparison could use improvement to get more results
 	}
 

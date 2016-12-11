@@ -8,6 +8,8 @@ import java.sql.*;
 
 public class pittTours{
 	static Random rand = new Random();
+	static String[] cities = {"NY", "PIT", "BOS", "CHI", "LA", "MIL"};
+	
 	public static void main(String[] args) throws IOException {
 		System.out.println("Welcome! Would you like to view the administrator menu or the customer menu? Choose an option");
 		System.out.println("1. Administrator\n2. Customer");
@@ -54,14 +56,21 @@ public class pittTours{
 		String[] fNames = new String[5000];
 		String[] lNames = new String[5000];
 		
-		System.out.println("Testing Customer program.");
-		System.out.println("Adding 5000 customers");
-		int customersAdded = addCustomerTest(conn, fNames, lNames);
-		System.out.println(customersAdded + " customers created!");
-		System.out.println("\nRetrieving info for all added customers");
-		getCustomerInfoTest(conn, fNames, lNames);
+		//test customer creation
+		// System.out.println("Testing Customer program.");
+		// System.out.println("Adding 5000 customers");
+		// int customersAdded = addCustomerTest(conn, fNames, lNames);
+		// System.out.println(customersAdded + " customers created!");
+		// test customer info retrieval
+		// System.out.println("\nRetrieving info for all added customers");
+		// getCustomerInfoTest(conn, fNames, lNames);
+		// test price retrieval
 		System.out.println("Testing GET PRICE function");
 		getAllPrices(conn);
+		
+		// test routes retrieval
+		System.out.println("Testing get routes function");
+		getRoutesTest(conn);
 	}
 	
 	public static int addCustomerTest(Connection conn, String[] fNames, String[] lNames) {
@@ -106,5 +115,14 @@ public class pittTours{
 		pittToursCustomer.findPriceExe(conn, "BOS", "CHI");
 		pittToursCustomer.findPriceExe(conn, "CHI", "LA");
 		pittToursCustomer.findPriceExe(conn, "LA", "NY");
+	}
+	
+	public static void getRoutesTest(Connection conn) {
+		for (int i = 0; i < cities.length; i++) {
+			if (i < (cities.length - 1))
+				pittToursCustomer.findRoutesQuery(conn, cities[i], cities[i+1]);
+			else
+				pittToursCustomer.findRoutesQuery(conn, cities[i], cities[0]);
+		}
 	}
 }
