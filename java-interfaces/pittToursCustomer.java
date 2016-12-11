@@ -218,9 +218,14 @@ public class pittToursCustomer {
 
     System.out.println("\nLast Name:");
     String lastName = input.readLine();
-
+		
+		getCustInfo(conn, firstName, lastName);
+		
+		main(new String[1]);
     // input.close();
-
+	}
+	
+	public static void getCustInfo(Connection conn, String firstName, String lastName) {
     // Call SQL/PL, print customer info for customer with that name
 		String query = "select * from customer where first_name = \'" + firstName + "\' and last_name = \'" + lastName + "\'";
 		
@@ -243,7 +248,7 @@ public class pittToursCustomer {
 			}
 			else {
 				System.out.println("\nCustomer not found!");
-				showCustInfo(conn);
+				// showCustInfo(conn);
 			}
 			srch.close();
 		} catch (SQLException e) {
@@ -251,7 +256,7 @@ public class pittToursCustomer {
 			e.printStackTrace();
 			return;
 		}
-		main(new String[1]);
+		return;
 	}
 
   /* 3. findPrice */
