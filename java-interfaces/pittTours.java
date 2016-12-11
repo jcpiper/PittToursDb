@@ -51,16 +51,26 @@ public class pittTours{
 			return;
 
 		}
+		String[] fNames = new String[5000];
+		String[] lNames = new String[5000];
+		
 		System.out.println("Testing Customer program.");
 		System.out.println("Adding 5000 customers");
-		int customersAdded = addCustomerTest(conn);
+		int customersAdded = addCustomerTest(conn, fNames, lNames);
 		System.out.println(customersAdded + " customers created!");
+		System.out.println("\nRetrieving info for all added customers");
+		getCustomerInfoTest(conn, fNames, lNames);
 	}
 	
-	public static int addCustomerTest(Connection conn) {
+	public static int addCustomerTest(Connection conn, String[] fNames, String[] lNames) {
 		int customers = 0;
+		
 		for (int i = 0; i < 5000; i++) {
-			customers += pittToursCustomer.createCustomer("Ms", getName(i%25 +5), getName(i%25 +5), getCardNum(), "30-SEP-2017", "DAWSON", "PITTSBURGH", "PA", "4121234567", "fake@gmail.com", conn);
+			String fName = getName(i%25 +5);
+			String lName = getName(i%25 +5);
+			customers += pittToursCustomer.createCustomer("Ms", fName, lName, getCardNum(), "30-SEP-2017", "DAWSON", "PITTSBURGH", "PA", "4121234567", "fake@gmail.com", conn);
+			fNames[i] = fName;
+			lNames[i] = lName;
 		}
 		return customers;
 	}
@@ -82,4 +92,9 @@ public class pittTours{
 		return sb.toString();
 	}
 	
+	public static void getCustomerInfoTest(Connection conn, String[] fNames, String[] lNames) {
+		for (int i = 0; i < fNames.length; i++) {
+			pittToursCustomer.getCustInfo(conn, fNames[i], lNames[i]);
+		}
+	}
 }
