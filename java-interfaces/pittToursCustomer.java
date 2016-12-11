@@ -607,9 +607,9 @@ public class pittToursCustomer {
 
 		System.out.println("\nPlease enter the preferred airline.");
 		System.out.println("Waiting for input...");
-		String airline = input.readLine();
+		String airLine = input.readLine();
 
-		System.out.println("Airline: " + airline);
+		System.out.println("Airline: " + airLine);
 
 		System.out.println("\nPlease enter the preferred date in the format (YYYY MM DD).");
 		System.out.println("Waiting for input...");
@@ -617,8 +617,47 @@ public class pittToursCustomer {
 
 		System.out.println("Date: " + date);
 
-		input.close();
+		// input.close();
+		
+		
+		String directQuery = "select f.airline_id, f.flight_number, f.departure_city, f.departure_time, f.arrival_time " +
+													"from flight f join airline a on f.airline_id = a.airline_id " +
+													"where f.departure_city = \'" + depCity + "\' and f.arrival_city = \'" + arrCity + "\' and a.airline_name = \'" + airLine + "\' and " +
+													"(select max(plane_capacity) from plane) > (select count(*) from reservation_detail where flight_number = f.flight_number " +
+													" and flight_date = \'" + date + "\') ";
+									
+		String connectQuery = "select f.airline_id, f.flight_number, f.departure_city, f.departure_time, s.arrival_time " +
+			"from flight f, flight s, airline a " +
+			"where " +
+			"f.departure_city = \'" + depCity + "\' and s.arrival_city = \'" + arrCity + "\' and f.arrival_city = s.departure_city and a.airline_name = \'" + airLine + 
+			"\' and s.departure_time >= (f.arrival_time + 100) and " +
+			"(select max(plane_capacity) from plane) > (select count(*) from reservation_detail where flight_number = f.flight_number and flight_date = \'" + date + "\') " +
+			"and (select max(plane_capacity) from plane) > (select count(*) from reservation_detail where flight_number = s.flight_number and flight_date = \'" + date + "\')";
+		
+		
+		try {
+			PreparedStatement query1 = conn.prepareStatement(directQuery);
+			PreparedStatement query2 = conn.prepareStatement(connectQuery);
+			ResultSet dirRoutes = query1.executeQuery();
+			ResultSet conRoutes = query2.executeQuery();
+			
+			System.out.println("Airline ID\tFlight Number\tDeparture City\tDeparture Time\tArrival Time");
+			System.out.println("--------------------------------------------------------------------");
+			while(dirRoutes.next()) {
+				// output query results
+				System.out.println(dirRoutes.getString(1) + "\t" + dirRoutes.getString(2) + "\t" + dirRoutes.getString(3) + "\t" + dirRoutes.getInt(4) + "\t" + dirRoutes.getInt(5));
+			}
 
+			while(conRoutes.next()){
+				System.out.println(conRoutes.getString(1) + "\t" + conRoutes.getString(2) + "\t" + conRoutes.getString(3) + "\t" + conRoutes.getInt(4) + "\t" + conRoutes.getInt(5));
+			}
+			query1.close();
+			query2.close();
+		} catch(SQLException e) {
+			System.out.println("Queries Failed!");
+			e.printStackTrace();
+			return;
+		}
     // SQL/PL Find Routes on date
 	}
 
