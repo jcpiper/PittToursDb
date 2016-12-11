@@ -140,17 +140,21 @@ create or replace trigger adjustTicket
   for each row
 begin
   update Reservation
-  set cost =  case
-                when cost = :old.low_price and ticketed = 'N' then
-                  :new.low_price
-                when cost = :old.high_price and ticketed = 'N' then
-                  :new.high_price
-                else
-                  111
-              end
-  where :new.departure_city = start_city and :new.arrival_city = end_city;
+  set cost = case
+              when cost = :old.low_price and ticketed = 'N' then
+                :new.low_price
+              when cost = :old.high_price and ticketed = 'N' then
+                :new.high_price
+             end
+  where reservation_number = (select reservation_number
+                                from flight f join reservation_detail rd
+                                on f.flight_number = rd.flight_number
+                              where airline_id = :old.airline_id
+                                and departure_city = :old.departure_city
+                                and arrival_city = :old.arrival_city);
 end;
 /
+show errors;
 
 set constraints flt_airline_fk, flt_plane_fk deferred;
 
@@ -234,14 +238,14 @@ show errors;
 create or replace function get_next_plane_owner (currPlane in int) return varchar2
 	as
 	owner varchar2(5);
-	
+
 	begin
 		select owner_id into owner
 		from plane
 		where plane_capacity > currPlane
 		order by plane_capacity
 		fetch first row only;
-		
+
 		return owner;
 	end;
 	/
@@ -260,7 +264,7 @@ create or replace procedure change_plane_type (currPlane in plane.plane_capacity
 			update flight
 			set plane_type = nxtPlane
 			where flight_number = flightNo;
-			
+
 			update flight
 			set airline_id = nxtAirline
 			where flight_number = flightNo;
@@ -274,26 +278,26 @@ show errors;
 create or replace function get_plane_type_for_flight (resy in varchar2) return char
 	as
 	plane char(4);
-	
+
 	begin
 		select plane_type into plane
 		from flight
 		where flight_number = resy;
-	
+
 		return plane;
 	end;
 	/
 show errors;
 
 create or replace function get_airline_for_flight (resy in varchar2) return varchar2
-	as 
+	as
 	airline varchar2(5);
-	
+
 	begin
 		select airline_id into airline
 		from flight
 		where flight_number = resy;
-		
+
 		return airline;
 	end;
 	/
@@ -304,20 +308,20 @@ create or replace function is_biggest_plane (plnType in char) return int
 	as
 	cap int;
 	lrg_cap int;
-	
+
 	begin
 		select plane_capacity into cap
 		from plane
 		where plane_type = plnType;
-		
+
 		select max(plane_capacity) into lrg_cap
 		from plane;
-		
+
 		if cap < lrg_cap then
 			return 0;
-		
+
 		else return 1;
-		
+
 		end if;
 	end;
 	/
