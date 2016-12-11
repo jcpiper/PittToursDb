@@ -9,6 +9,11 @@ import java.sql.*;
 public class pittTours{
 	static Random rand = new Random();
 	static String[] cities = {"NY", "PIT", "BOS", "CHI", "LA", "MIL"};
+	static String[] airlines = {
+		"United Airlines", "Delta Airlines", "American Airlines", "Northwest Airlines",
+		"Southwest Airlines", "Fronteir Airlines", "Malaysia Airlines",
+		"Emirates Airlines", "Alaska Airlines", "JetBlue"
+	};
 	
 	public static void main(String[] args) throws IOException {
 		System.out.println("Welcome! Would you like to view the administrator menu or the customer menu? Choose an option");
@@ -67,10 +72,15 @@ public class pittTours{
 		// test price retrieval
 		System.out.println("Testing GET PRICE function");
 		getAllPrices(conn);
-		
+		System.out.println("\n\n---------------------------------------------\n");
 		// test routes retrieval
 		System.out.println("Testing get routes function");
 		getRoutesTest(conn);
+		System.out.println("\n\n---------------------------------------------\n");
+		
+		// test routes by airline retrieval
+		System.out.println("Testing get routes by airline function");
+		getRoutesByAirlineTest(conn);
 	}
 	
 	public static int addCustomerTest(Connection conn, String[] fNames, String[] lNames) {
@@ -123,6 +133,27 @@ public class pittTours{
 				pittToursCustomer.findRoutesQuery(conn, cities[i], cities[i+1]);
 			else
 				pittToursCustomer.findRoutesQuery(conn, cities[i], cities[0]);
+		}
+	}
+	
+	public static void getRoutesByAirlineTest(Connection conn) {
+		for (int i = 0; i < cities.length; i++) {
+			if (i < (cities.length - 1)){
+				System.out.println("\n--------------------------------------------\n");
+				System.out.println("From " + cities[i] + " TO " + cities[i+1]);
+			}
+			else{
+				System.out.println("\n--------------------------------------------\n");
+				System.out.println("FROM " + cities[i] + " TO " + cities[0]);
+			}
+			for (int n = 0; n < airlines.length; n++){
+				System.out.println("\n---------------------------------------------\n");
+				System.out.println("Airline: " + airlines[n]);
+				if (i < (cities.length - 1))
+					pittToursCustomer.findRoutesByAirlineQuery(conn, cities[i], cities[i+1], airlines[n]);
+				else
+					pittToursCustomer.findRoutesByAirlineQuery(conn, cities[i], cities[0], airlines[n]);
+			}
 		}
 	}
 }

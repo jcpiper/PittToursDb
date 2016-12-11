@@ -468,9 +468,11 @@ public class pittToursCustomer {
 		String airline = input.readLine();
 
 		System.out.println("Airline: " + airline);
-
-		// input.close();
-		
+		findRoutesByAirlineQuery(conn, depCity, arrCity, airline);
+		main(new String[1]);
+	}
+	
+	public static void findRoutesByAirlineQuery(Connection conn, String depCity, String arrCity, String airline) {
 		// print flight number, departure, city, departure time, and arrival time
 		String directRoutesQuery = "select flight_number, departure_city, departure_time, arrival_time " +
 										"from flight f join airline a on f.airline_id = a.airline_id " +
@@ -500,7 +502,7 @@ public class pittToursCustomer {
 			while(conRoutes.next()) {
 				// check the flights have at least 1 day in common on schedule
 				String sched1 = conRoutes.getString(6);
-				String sched2 = conRoutes.getString(12);
+				String sched2 = conRoutes.getString(13);
 				boolean aligned = false;
 				
 				for (int i=0; i < 7; i++) {
@@ -524,7 +526,7 @@ public class pittToursCustomer {
 			e.printStackTrace();
 			return;
 		}
-		main(new String[1]);
+		return;
     // SQL/PL Find routes by airline
 	}
 
