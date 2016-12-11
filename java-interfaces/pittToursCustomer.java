@@ -113,25 +113,6 @@ public class pittToursCustomer {
 
     System.out.println("Last Name:");
     String lastName = input.readLine();
-		
-		String query = "select * from customer where first_name = \'" + firstName + "\' and last_name = \'" + lastName + "\'";
-		int rowCount = 0;
-		try {
-			PreparedStatement srch = conn.prepareStatement(query);	
-			ResultSet rs = srch.executeQuery();
-			if(rs.next()){
-				rowCount = rs.getRow();
-			}
-		} catch (SQLException e) {
-			System.out.println("ERROR! Query failed, see stack trace");
-			e.printStackTrace();
-			return;
-		}
-		if (rowCount > 0) {
-			System.out.println("\n\nERROR. User with name " + firstName + " " + lastName + " already exists!\n\n");
-			// main(new String[1]);
-			main(new String[1]);
-		}
 
     System.out.println("Street:");
     String street = input.readLine();
@@ -155,9 +136,36 @@ public class pittToursCustomer {
     String ccExp = input.readLine();
 
     // input.close();
+		int rowsUpdated = createCustomer(title, firstName, lastName, ccNum, ccExp, street, city, state, phoneNum, email, conn);
+		if (rowsUpdated != 1)
+			System.exit(1);
+		main(new String[1]);
+	}
 		
+	public static int createCustomer(String title, String firstName, String lastName, String ccNum, String ccExp, String street, String city, String state, String phoneNum, String email, Connection conn) {
+		
+		String query = "select * from customer where first_name = \'" + firstName + "\' and last_name = \'" + lastName + "\'";
+		int rowCount = 0;
+		try {
+			PreparedStatement srch = conn.prepareStatement(query);	
+			ResultSet rs = srch.executeQuery();
+			if(rs.next()){
+				rowCount = rs.getRow();
+			}
+			rs.close();
+			srch.close();
+		} catch (SQLException e) {
+			System.out.println("ERROR! Query failed, see stack trace");
+			e.printStackTrace();
+			return 0;
+		}
+		if (rowCount > 0) {
+			System.out.println("\n\nERROR. User with name " + firstName + " " + lastName + " already exists!\n\n");
+			// main(new String[1]);
+			return 0;
+		}
 		//generate cid
-		query = "select max(cid) from customer";
+		query = "select max(cast(cid as int)) from customer";
 		int newCid = 0;
 		try {
 			PreparedStatement getCid = conn.prepareStatement(query);
@@ -166,13 +174,15 @@ public class pittToursCustomer {
 			if (lastCid.next()) {
 				maxCid = lastCid.getInt(1);
 				newCid = maxCid + 1;
+				System.out.println("New cid: " + newCid);
 			}
 			else System.out.println("\n\nERROR! CID was not generated.");
+			lastCid.close();
 			getCid.close();
 		} catch (SQLException e) {
 			System.out.println("ERROR. QUERY FAILED");
 			e.printStackTrace();
-			return;
+			return 0;
 		}
 		
     // Concatenate strings to input, call SQL/PL
@@ -186,15 +196,16 @@ public class pittToursCustomer {
 				PreparedStatement insrt = conn.prepareStatement(query);
 				
 				int rows = insrt.executeUpdate();
-				System.out.println(rows + " rows updated.");
-				System.out.println("Your PittRewards number is " + newCid + ". Keep this for your records.");
+				// System.out.println(rows + " rows updated.");
+				// System.out.println("Your PittRewards number is " + newCid + ". Keep this for your records.");
 				insrt.close();
+				return rows;
 			} catch (SQLException e) {
 				System.out.println("Update Failed!");
+				System.out.println("Issue with pk? cid = " + newCid);
 				e.printStackTrace();
-				return;
+				return 0;
 			}
-			main(new String[1]);
 	}
 
   /* 2. showCustInfo */
