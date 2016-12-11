@@ -40,10 +40,16 @@ public class pittToursCustomer {
     System.out.println("8.  Add a reservation.");
     System.out.println("9.  Show reservation info by reservation number.");
     System.out.println("10. Buy ticket for existing reservation.");
+		
+		System.out.println("\nTo exit program: E/EXIT");
 
 		BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
 		System.out.println("\n\nPlease enter the option number of your desired action. i.e. to add customer, enter \"1\"");
-		int option = Integer.valueOf(input.readLine());
+		String opt = input.readLine();
+		if (opt.toUpperCase().equals("E") || opt.toUpperCase().equals("EXIT")) {
+			System.exit(0);
+		}
+		int option = Integer.valueOf(opt);
 		switch (option) {
 			case 1:
 				System.out.println("You have chosen to add a customer.");
@@ -124,7 +130,7 @@ public class pittToursCustomer {
 		if (rowCount > 0) {
 			System.out.println("\n\nERROR. User with name " + firstName + " " + lastName + " already exists!\n\n");
 			// main(new String[1]);
-			return;
+			main(new String[1]);
 		}
 
     System.out.println("Street:");
@@ -186,7 +192,9 @@ public class pittToursCustomer {
 			} catch (SQLException e) {
 				System.out.println("Update Failed!");
 				e.printStackTrace();
+				return;
 			}
+			main(new String[1]);
 	}
 
   /* 2. showCustInfo */
@@ -232,6 +240,7 @@ public class pittToursCustomer {
 			e.printStackTrace();
 			return;
 		}
+		main(new String[1]);
 	}
 
   /* 3. findPrice */
@@ -241,20 +250,20 @@ public class pittToursCustomer {
 		System.out.println("\nPlease enter the first city for the flight. E.G. \"CHI\"");
 		System.out.println("Waiting for input...");
 		String depCity = input.readLine().toUpperCase();
-		if (depCity.length() > 3) {
+		if (depCity.length() > 3 || depCity.length() < 2) {
 			input.close();
 			System.out.println("ERROR. City name was too long. Expecting a 2 or 3 character abbreviation like \"NY\" or \"CHI\"");
-			System.exit(1);
+			findPrice(conn);
 		}
 		System.out.println("First City: " + depCity);
 
 		System.out.println("\nPlease enter the second city for the flight. E.G. \"PIT\"");
 		System.out.println("Waiting for input...");
 		String arrCity = input.readLine().toUpperCase();
-		if (arrCity.length() > 3) {
+		if (arrCity.length() > 3 || arrCity.length() < 2) {
 			input.close();
 			System.out.println("ERROR. City name was too long. Expecting a 2 or 3 character abbreviation like \"NY\" or \"CHI\"");
-			System.exit(1);
+			findPrice(conn);
 		}
 		System.out.println("Second City: " + arrCity);
 
@@ -278,7 +287,7 @@ public class pittToursCustomer {
 			}
 			else {
 				System.out.println("\nPrice data not found!");
-				showCustInfo(conn);
+				findPrice(conn);
 			}
 			srch.close();
 		} catch (SQLException e) {
@@ -313,7 +322,7 @@ public class pittToursCustomer {
 			}
 			else {
 				System.out.println("\nPrice data not found!");
-				showCustInfo(conn);
+				findPrice(conn);
 			}
 			srch2.close();
 		} catch (SQLException e) {
@@ -321,6 +330,7 @@ public class pittToursCustomer {
 			e.printStackTrace();
 			return;
 		}
+		main(new String[1]);
     // Call SQL/PL, print prices for one way each way & round trip
 	}
 
@@ -331,24 +341,22 @@ public class pittToursCustomer {
 		System.out.println("\nPlease enter the departure city for the flight. E.G. \"CHI\"");
 		System.out.println("Waiting for input...");
 		String depCity = input.readLine().toUpperCase();
-		if (depCity.length() > 3) {
+		if (depCity.length() > 3 || depCity.length() < 2) {
 			input.close();
 			System.out.println("ERROR. City name was too long. Expecting a 2 or 3 character abbreviation like \"NY\" or \"CHI\"");
-			System.exit(1);
+			findRoutes(conn);
 		}
 		System.out.println("Departure City: " + depCity);
 
 		System.out.println("\nPlease enter the destination city for the flight. E.G. \"PIT\"");
 		System.out.println("Waiting for input...");
 		String arrCity = input.readLine().toUpperCase();
-		if (arrCity.length() > 3) {
+		if (arrCity.length() > 3 || arrCity.length() < 2) {
 			input.close();
 			System.out.println("ERROR. City name was too long. Expecting a 2 or 3 character abbreviation like \"NY\" or \"CHI\"");
-			System.exit(1);
+			findRoutes(conn);
 		}
 		System.out.println("Destination City: " + arrCity);
-
-    input.close();
 
     // Call SQL/PL, print all possible one way routes
 		// print flight number, departure, city, departure time, and arrival time
@@ -357,10 +365,10 @@ public class pittToursCustomer {
 										"where departure_city = \'" + depCity + "\' and arrival_city = \'" + arrCity + "\'";
 		
 		// connections query
-		// needs work!
-		String connectionsQuery = "Select f.flight_number, f.departure_city, f.arrival_city, f.departure_time, f.arrival_time, f.weekly_schedule, s.flight_number, s.departure_city, s.arrival_city, s.departure_time, s.arrival_time, s.weekly_schedule " +
+		// Needs to incorporate f.arrival_time/s.departure_time comparison
+		String connectionsQuery = "Select f.flight_number, f.departure_city, f.departure_time, f.weekly_schedule, s.arrival_time, s.weekly_schedule " +
 															"from flight f join flight s on f.arrival_city = s.departure_city " +
-															"where f.departure_city = \'" + depCity + "\' and s.arrival_city = \'" + arrCity + "\'";													
+															"where f.departure_city = \'" + depCity + "\' and s.arrival_city = \'" + arrCity + "\' and s.departure_time > (f.arrival_time + 100)";													
 		// execute both queries and print results
 		try {
 			PreparedStatement query1 = conn.prepareStatement(directRoutesQuery);
@@ -378,8 +386,8 @@ public class pittToursCustomer {
 			
 			while(conRoutes.next()) {
 				// check the flights have at least 1 day in common on schedule
-				String sched1 = conRoutes.getString(6);
-				String sched2 = conRoutes.getString(12);
+				String sched1 = conRoutes.getString(4);
+				String sched2 = conRoutes.getString(6);
 				boolean aligned = false;
 				
 				for (int i=0; i < 7; i++) {
@@ -390,9 +398,8 @@ public class pittToursCustomer {
 					}
 				}
 				if(aligned) {
-					System.out.println(conRoutes.getString(1) + " " + conRoutes.getString(2) + " " + conRoutes.getString(3) + " " + conRoutes.getString(4) + " " +
-						conRoutes.getString(5) + " " + conRoutes.getString(6) + " " +
-						conRoutes.getString(7) + " " + conRoutes.getString(8) + " " + conRoutes.getString(9) + " " + conRoutes.getString(10) + " " + conRoutes.getString(11) + " " + conRoutes.getString(12));
+					System.out.println(conRoutes.getString(1) + " " + conRoutes.getString(2) + " " + conRoutes.getString(3) + " " + 
+						conRoutes.getString(5));
 				}
 				
 			}
@@ -403,6 +410,7 @@ public class pittToursCustomer {
 			e.printStackTrace();
 			return;
 		}
+		main(new String[1]);
 		// schedule comparison could use improvement to get more results
 	}
 
@@ -413,20 +421,20 @@ public class pittToursCustomer {
 		System.out.println("\nPlease enter the departure city for the flight. E.G. \"CHI\"");
 		System.out.println("Waiting for input...");
 		String depCity = input.readLine().toUpperCase();
-		if (depCity.length() > 3) {
-			input.close();
+		if (depCity.length() > 3 || depCity.length() < 2) {
+			// input.close();
 			System.out.println("ERROR. City name was too long. Expecting a 2 or 3 character abbreviation like \"NY\" or \"CHI\"");
-			System.exit(1);
+			findRoutesByAirline(conn);
 		}
 		System.out.println("Departure City: " + depCity);
 
 		System.out.println("\nPlease enter the destination city for the flight. E.G. \"PIT\"");
 		System.out.println("Waiting for input...");
 		String arrCity = input.readLine().toUpperCase();
-		if (arrCity.length() > 3) {
-			input.close();
+		if (arrCity.length() > 3 || arrCity.length() < 2) {
+			// input.close();
 			System.out.println("ERROR. City name was too long. Expecting a 2 or 3 character abbreviation like \"NY\" or \"CHI\"");
-			System.exit(1);
+			findRoutesByAirline(conn);
 		}
 		System.out.println("Destination City: " + arrCity);
 
@@ -491,7 +499,7 @@ public class pittToursCustomer {
 			e.printStackTrace();
 			return;
 		}
-
+		main(new String[1]);
     // SQL/PL Find routes by airline
 	}
 
@@ -502,20 +510,20 @@ public class pittToursCustomer {
 		System.out.println("\nPlease enter the departure city for the flight. E.G. \"CHI\"");
 		System.out.println("Waiting for input...");
 		String depCity = input.readLine().toUpperCase();
-		if (depCity.length() > 3) {
+		if (depCity.length() > 3 || depCity.length() < 2) {
 			// input.close();
 			System.out.println("ERROR. City name was too long. Expecting a 2 or 3 character abbreviation like \"NY\" or \"CHI\"");
-			System.exit(1);
+			findRoutesOnDay(conn);
 		}
 		System.out.println("Departure City: " + depCity);
 
 		System.out.println("\nPlease enter the destination city for the flight. E.G. \"PIT\"");
 		System.out.println("Waiting for input...");
 		String arrCity = input.readLine().toUpperCase();
-		if (arrCity.length() > 3) {
+		if (arrCity.length() > 3 || arrCity.length() < 2) {
 			// input.close();
 			System.out.println("ERROR. City name was too long. Expecting a 2 or 3 character abbreviation like \"NY\" or \"CHI\"");
-			System.exit(1);
+			findRoutesOnDay(conn);
 		}
 		System.out.println("Destination City: " + arrCity);
 
@@ -579,6 +587,7 @@ public class pittToursCustomer {
 			e.printStackTrace();
 			return;
 		}
+		main(new String[1]);
 	}
 
   /* 7. findRoutesOnDayByAirline */
@@ -588,20 +597,20 @@ public class pittToursCustomer {
 		System.out.println("\nPlease enter the departure city for the flight. E.G. \"CHI\"");
 		System.out.println("Waiting for input...");
 		String depCity = input.readLine().toUpperCase();
-		if (depCity.length() > 3) {
-			input.close();
+		if (depCity.length() > 3 || depCity.length() < 2) {
+			// input.close();
 			System.out.println("ERROR. City name was too long. Expecting a 2 or 3 character abbreviation like \"NY\" or \"CHI\"");
-			System.exit(1);
+			findRoutesOnDayByAirline(conn);
 		}
 		System.out.println("Departure City: " + depCity);
 
 		System.out.println("\nPlease enter the destination city for the flight. E.G. \"PIT\"");
 		System.out.println("Waiting for input...");
 		String arrCity = input.readLine().toUpperCase();
-		if (arrCity.length() > 3) {
-			input.close();
+		if (arrCity.length() > 3 || arrCity.length() < 2) {
+			// input.close();
 			System.out.println("ERROR. City name was too long. Expecting a 2 or 3 character abbreviation like \"NY\" or \"CHI\"");
-			System.exit(1);
+			findRoutesOnDayByAirline(conn);
 		}
 		System.out.println("Destination City: " + arrCity);
 
@@ -659,6 +668,7 @@ public class pittToursCustomer {
 			return;
 		}
     // SQL/PL Find Routes on date
+		main(new String[1]);
 	}
 
   /* 8. addReservation() */
@@ -692,7 +702,7 @@ public class pittToursCustomer {
     // input.close();
 
     // Verify legs, seats, date, generate res # and confirmation/error message.
-
+		main(new String[1]);
 	}
 
   /* 9. showResInfo */
@@ -734,6 +744,7 @@ public class pittToursCustomer {
 				e.printStackTrace();
 				return;
 			}
+			main(new String[1]);
   	}
 /*
 * ^^^ NEEDS TESTING ^^^
@@ -741,30 +752,32 @@ public class pittToursCustomer {
 
   /* 10. buyTicket */
 
-  	public static void buyTicket(Connection conn) throws IOException {
-    	BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
-      System.out.println("\nPlease input your reservation number.");
-      System.out.println("Reservation Number:");
-      String resNum = input.readLine();
+	public static void buyTicket(Connection conn) throws IOException {
+		BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
+		System.out.println("\nPlease input your reservation number.");
+		System.out.println("Reservation Number:");
+		String resNum = input.readLine();
 
-      input.close();
+		input.close();
 
-      // Call SQL/PL, see if ticket purchased, if not, purchase ticket
-			
-			String sql = "update reservation set ticketed = \'Y\' where reservation_number = \'" + resNum + "\'";
-			
-			try {
-				PreparedStatement updt = conn.prepareStatement(sql);
-				int result = updt.executeUpdate();
-				if (result == 1)
-					System.out.println("Ticket purchased.");
-				else
-					System.out.println("Uh oh! Something went wrong.");
-				return;
-			} catch(SQLException e) {
-				System.out.println("Update Failed!");
-				e.printStackTrace();
-				return;
+		// Call SQL/PL, see if ticket purchased, if not, purchase ticket
+		
+		String sql = "update reservation set ticketed = \'Y\' where reservation_number = \'" + resNum + "\'";
+		
+		try {
+			PreparedStatement updt = conn.prepareStatement(sql);
+			int result = updt.executeUpdate();
+			if (result == 1)
+				System.out.println("Ticket purchased.");
+			else{
+				System.out.println("Uh oh! Something went wrong.");
+				System.exit(1);
 			}
-  	}
+		} catch(SQLException e) {
+			System.out.println("Update Failed!");
+			e.printStackTrace();
+			return;
+		}
+		main(new String[1]);
+	}
 }
