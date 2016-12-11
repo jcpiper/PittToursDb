@@ -559,7 +559,10 @@ public class pittToursCustomer {
 		String date = input.readLine();
 
 		System.out.println("Date: " + date);
-
+		findRoutesOnDayQuery(conn, depCity, arrCity, date);
+		main(new String[1]);
+	}
+	
 		// input.close();
 
     // SQL/PL Find Routes on date
@@ -579,16 +582,18 @@ public class pittToursCustomer {
 			)			
 		*
 		*/
+	public static void findRoutesOnDayQuery(Connection conn, String depCity, String arrCity, String date) {
 		String directQuery = "select f.flight_number, f.departure_city, f.departure_time, f.arrival_time " +
-													"from flight f " +
-													"where f.departure_city = \'" + depCity + "\' and f.arrival_city = \'" + arrCity + "\' and " +
+													"from flight f join reservation_detail d on f.flight_number = d.flight_number " +
+													"where f.departure_city = \'" + depCity + "\' and f.arrival_city = \'" + arrCity + "\' and d.flight_date = \'"  + date + "\' and " +
 													"(select max(plane_capacity) from plane) > (select count(*) from reservation_detail where flight_number = f.flight_number " +
 													" and flight_date = \'" + date + "\') ";
 									
 		String connectQuery = "select f.flight_number, f.departure_city, f.departure_time, s.arrival_time " +
-			"from flight f, flight s " +
+			"from flight f, flight s, reservation_detail d " +
 			"where " +
 			"f.departure_city = \'" + depCity + "\' and s.arrival_city = \'" + arrCity + "\' and f.arrival_city = s.departure_city and s.departure_time >= (f.arrival_time + 100) and " +
+			"f.flight_number = d.flight_number and d.flight_date = \'" + date + "\' and " + 
 			"(select max(plane_capacity) from plane) > (select count(*) from reservation_detail where flight_number = f.flight_number and flight_date = \'" + date + "\') " +
 			"and (select max(plane_capacity) from plane) > (select count(*) from reservation_detail where flight_number = s.flight_number and flight_date = \'" + date + "\')";
 		
@@ -614,7 +619,7 @@ public class pittToursCustomer {
 			e.printStackTrace();
 			return;
 		}
-		main(new String[1]);
+		return;
 	}
 
   /* 7. findRoutesOnDayByAirline */
@@ -652,23 +657,32 @@ public class pittToursCustomer {
 		String date = input.readLine();
 
 		System.out.println("Date: " + date);
-
-		// input.close();
 		
+		findRoutesOnDayByAirlineQuery(conn, depCity, arrCity, date, airLine);
+		main(new String[1]);
+	}
+	
+	public static void findRoutesOnDayByAirlineQuery(Connection conn, String depCity, String arrCity, String date, String airLine){
 		
-		String directQuery = "select f.airline_id, f.flight_number, f.departure_city, f.departure_time, f.arrival_time " +
-													"from flight f join airline a on f.airline_id = a.airline_id " +
+		String directQuery = "select distinct f.airline_id, f.flight_number, f.departure_city, f.departure_time, f.arrival_time " +
+													"from flight f join airline a on f.airline_id = a.airline_id " +//join reservation_detail d on f.flight_number = d.flight_number " +
 													"where f.departure_city = \'" + depCity + "\' and f.arrival_city = \'" + arrCity + "\' and a.airline_name = \'" + airLine + "\' and " +
+													// "d.flight_date = \'" + date + "\' and " +
 													"(select max(plane_capacity) from plane) > (select count(*) from reservation_detail where flight_number = f.flight_number " +
-													" and flight_date = \'" + date + "\') ";
+													" and flight_date = \'" + date + "\') and " +
+													"exists (select * from reservation_detail d where " +
+													"f.flight_number=d.flight_number and d.flight_date = \'" + date + "\' and f.airline_id = a.airline_id)";
+													
 									
 		String connectQuery = "select f.airline_id, f.flight_number, f.departure_city, f.departure_time, s.arrival_time " +
 			"from flight f, flight s, airline a " +
 			"where " +
 			"f.departure_city = \'" + depCity + "\' and s.arrival_city = \'" + arrCity + "\' and f.arrival_city = s.departure_city and a.airline_name = \'" + airLine + 
-			"\' and s.departure_time >= (f.arrival_time + 100) and " +
+			"\' and s.departure_time >= (f.arrival_time + 100) and a.airline_id = f.airline_id and a.airline_id = s.airline_id and " +
 			"(select max(plane_capacity) from plane) > (select count(*) from reservation_detail where flight_number = f.flight_number and flight_date = \'" + date + "\') " +
-			"and (select max(plane_capacity) from plane) > (select count(*) from reservation_detail where flight_number = s.flight_number and flight_date = \'" + date + "\')";
+			"and (select max(plane_capacity) from plane) > (select count(*) from reservation_detail where flight_number = s.flight_number and flight_date = \'" + date + "\') and " +
+			"exists (select * from reservation_detail d where " +
+			"f.flight_number=d.flight_number and d.flight_date = \'" + date + "\' and f.airline_id = a.airline_id)";
 		
 		
 		try {
@@ -683,7 +697,7 @@ public class pittToursCustomer {
 				// output query results
 				System.out.println(dirRoutes.getString(1) + "\t" + dirRoutes.getString(2) + "\t" + dirRoutes.getString(3) + "\t" + dirRoutes.getInt(4) + "\t" + dirRoutes.getInt(5));
 			}
-
+			System.out.println("\nConnections:");
 			while(conRoutes.next()){
 				System.out.println(conRoutes.getString(1) + "\t" + conRoutes.getString(2) + "\t" + conRoutes.getString(3) + "\t" + conRoutes.getInt(4) + "\t" + conRoutes.getInt(5));
 			}
@@ -695,7 +709,7 @@ public class pittToursCustomer {
 			return;
 		}
     // SQL/PL Find Routes on date
-		main(new String[1]);
+		return;
 	}
 
   /* 8. addReservation() */
@@ -725,6 +739,11 @@ public class pittToursCustomer {
       flightNumbers.add(flightNum);
       depDates.add(date);
     }
+		addReservationQuery(conn, flightNumbers, depDates);
+		main(new String[1]);
+	}
+	
+	public static void addReservationQuery(Connection conn, ArrayList<String> flightNumbers, ArrayList<String> depDates) {
 		String maxSeatsQuery = "select max(plane_capacity) from plane";
 		int maxSeats = 0;
 		try{
@@ -831,7 +850,7 @@ public class pittToursCustomer {
 			}
 		}
 		
-		
+		return;
 	}
 
   /* 9. showResInfo */

@@ -81,6 +81,18 @@ public class pittTours{
 		// test routes by airline retrieval
 		System.out.println("Testing get routes by airline function");
 		getRoutesByAirlineTest(conn);
+		System.out.println("\n\n---------------------------------------------\n");
+		
+		//test routes by day
+		System.out.println("Testing get routes on day function");
+		getRoutesOnDayTest(conn);
+		System.out.println("\n\n---------------------------------------------\n");
+		
+		//test routes by day by airline
+		System.out.println("Testing get routes on day by airline function");
+		getRoutesOnDayByAirlineTest(conn);
+		System.out.println("\n\n---------------------------------------------\n");		
+		
 	}
 	
 	public static int addCustomerTest(Connection conn, String[] fNames, String[] lNames) {
@@ -155,5 +167,61 @@ public class pittTours{
 					pittToursCustomer.findRoutesByAirlineQuery(conn, cities[i], cities[0], airlines[n]);
 			}
 		}
+	}
+	
+	public static void getRoutesOnDayTest(Connection conn) {
+		String[] dates = {"11-SEP-2017", "16-JUN-2017", "12-dec-2017"};
+		for (int i = 0; i < cities.length; i++){
+			if (i < (cities.length - 1)){
+				System.out.println("\n--------------------------------------------\n");
+				System.out.println("From " + cities[i] + " TO " + cities[i+1]);
+			}
+			else{
+				System.out.println("\n--------------------------------------------\n");
+				System.out.println("FROM " + cities[i] + " TO " + cities[0]);
+			}
+			for (int n = 0; n < dates.length; n++) {
+				System.out.println("--------------------------------");
+				System.out.println("DATE: " + dates[n] + "\n");
+				if (i < (cities.length - 1))
+					pittToursCustomer.findRoutesOnDayQuery(conn, cities[i], cities[i+1], dates[n]);
+				else
+					pittToursCustomer.findRoutesOnDayQuery(conn, cities[i], cities[0], dates[n]);
+			}
+		}
+	}
+	
+	public static void getRoutesOnDayByAirlineTest(Connection conn) {
+		String[] dates = {"11-SEP-2017", "16-JUN-2017", "12-dec-2017"};
+		// pittToursCustomer.findRoutesOnDayByAirlineQuery(conn, "PIT", "BOS", "11-SEP-2017", "JetBlue");
+		// System.out.println("Different airline now");
+		// pittToursCustomer.findRoutesOnDayByAirlineQuery(conn, "PIT", "BOS", "11-SEP-2017", "Delta Airlines");
+
+		for (int i = 0; i < cities.length; i++){
+			if (i < (cities.length - 1)){
+				System.out.println("\n--------------------------------------------\n");
+				System.out.println("From " + cities[i] + " TO " + cities[i+1]);
+			}
+			else{
+				System.out.println("\n--------------------------------------------\n");
+				System.out.println("FROM " + cities[i] + " TO " + cities[0]);
+			}
+			for (int n = 0; n < dates.length; n++) {
+				System.out.println("--------------------------------");
+				System.out.println("DATE: " + dates[n] + "\n");
+				for (int x = 0; x < airlines.length; x++){
+					System.out.println("--------------------------------");
+					System.out.println("AIRLINE: " + airlines[x] + "\n");
+					if (i < (cities.length - 1))
+						pittToursCustomer.findRoutesOnDayByAirlineQuery(conn, cities[i], cities[i+1], dates[n], airlines[x]);
+					else
+						pittToursCustomer.findRoutesOnDayByAirlineQuery(conn, cities[i], cities[0], dates[n], airlines[x]);
+				}
+			}
+		}
+	}
+	
+	public static void addReservationTest(Connection conn) {
+		
 	}
 }
