@@ -750,5 +750,21 @@ public class pittToursCustomer {
       input.close();
 
       // Call SQL/PL, see if ticket purchased, if not, purchase ticket
+			
+			String sql = "update reservation set ticketed = \'Y\' where reservation_number = \'" + resNum + "\'";
+			
+			try {
+				PreparedStatement updt = conn.prepareStatement(sql);
+				int result = updt.executeUpdate();
+				if (result == 1)
+					System.out.println("Ticket purchased.");
+				else
+					System.out.println("Uh oh! Something went wrong.");
+				return;
+			} catch(SQLException e) {
+				System.out.println("Update Failed!");
+				e.printStackTrace();
+				return;
+			}
   	}
 }
