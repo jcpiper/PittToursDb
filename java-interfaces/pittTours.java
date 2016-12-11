@@ -60,6 +60,8 @@ public class pittTours{
 		System.out.println(customersAdded + " customers created!");
 		System.out.println("\nRetrieving info for all added customers");
 		getCustomerInfoTest(conn, fNames, lNames);
+		System.out.println("Testing GET PRICE function");
+		getAllPrices(conn);
 	}
 	
 	public static int addCustomerTest(Connection conn, String[] fNames, String[] lNames) {
@@ -96,5 +98,13 @@ public class pittTours{
 		for (int i = 0; i < fNames.length; i++) {
 			pittToursCustomer.getCustInfo(conn, fNames[i], lNames[i]);
 		}
+	}
+	
+	public static void getAllPrices(Connection conn) {
+		pittToursCustomer.findPriceExe(conn, "NY", "PIT");
+		pittToursCustomer.findPriceExe(conn, "PIT", "BOS");
+		pittToursCustomer.findPriceExe(conn, "BOS", "CHI");
+		pittToursCustomer.findPriceExe(conn, "CHI", "LA");
+		pittToursCustomer.findPriceExe(conn, "LA", "NY");
 	}
 }

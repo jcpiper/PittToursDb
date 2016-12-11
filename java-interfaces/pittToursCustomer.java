@@ -283,8 +283,10 @@ public class pittToursCustomer {
 		}
 		System.out.println("Second City: " + arrCity);
 
-    // input.close();
-
+    main(new String[1]);
+	}
+	
+	public static void findPriceExe(Connection conn, String depCity, String arrCity) {
 		String query = "select high_price, low_price from price " +
 									"where departure_city = \'" + depCity + "\' and arrival_city = \'" + arrCity + "\'";
 		int hiPrice = 0, loPrice = 0;
@@ -303,7 +305,7 @@ public class pittToursCustomer {
 			}
 			else {
 				System.out.println("\nPrice data not found!");
-				findPrice(conn);
+				return;
 			}
 			srch.close();
 		} catch (SQLException e) {
@@ -338,7 +340,7 @@ public class pittToursCustomer {
 			}
 			else {
 				System.out.println("\nPrice data not found!");
-				findPrice(conn);
+				return;
 			}
 			srch2.close();
 		} catch (SQLException e) {
@@ -346,7 +348,7 @@ public class pittToursCustomer {
 			e.printStackTrace();
 			return;
 		}
-		main(new String[1]);
+		return;
     // Call SQL/PL, print prices for one way each way & round trip
 	}
 
