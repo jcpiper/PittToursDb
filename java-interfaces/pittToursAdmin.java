@@ -5,20 +5,20 @@ import java.io.*;
 import java.sql.*;
 
 public class pittToursAdmin {
-	
+
 	public static void main (String[] args) throws IOException {
-		
+
 		// set up db connection
 		Connection conn = null;
 		try {
 			// register oracle driver
 			DriverManager.registerDriver (new oracle.jdbc.driver.OracleDriver());
-			
+
 			String url = "jdbc:oracle:thin:@class3.cs.pitt.edu:1521:dbclass";
-			String uname = "jcp68";
-			String passwrd = "3788990";
+			String uname = "pmh35";
+			String passwrd = "4066320";
 			conn = DriverManager.getConnection(url, uname, passwrd);
-			
+
 		} catch (SQLException e) {
 
 			System.out.println("Where is your Oracle JDBC Driver?");
@@ -29,7 +29,7 @@ public class pittToursAdmin {
 
 		System.out.println("Oracle JDBC Driver Registered!");
 
-		
+
 		System.out.println("Welcome! Please select an option to proceed.");
 		System.out.println("1. Erase database.");
 		System.out.println("2. Load airline info.");
@@ -37,16 +37,16 @@ public class pittToursAdmin {
 		System.out.println("4. Load pricing information.");
 		System.out.println("5. Load plane information.");
 		System.out.println("6: Generate passenger manifest for specific flight on given day.");
-		
+
 		BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
 		System.out.println("\n\nPlease enter the option number of your desired action. i.e. to erase the database, enter \"1\"");
 		String option = input.readLine();
-	
+
 		if (option.equals("1")) {
 			System.out.println("You have chosen to erase the database.");
 			eraseDb(conn);
 		}
-			
+
 		else if (option.equals("2")) {
 			System.out.println("You have chosen to load airline info.");
 			loadAirline(conn);
@@ -73,12 +73,12 @@ public class pittToursAdmin {
 			main(params);
 		}
 	}
-	
+
 	public static void eraseDb(Connection conn) throws IOException {
 		System.out.println("Are you sure you want to erase the database?\ny/n");
 		BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
 		String confirm = input.readLine().toLowerCase();
-		
+
 		if (confirm.equals("y")) {
 			try {
 				System.out.println("Erasing the database.");
@@ -105,7 +105,7 @@ public class pittToursAdmin {
 		BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
 		System.out.println("\nPlease enter the file name where the airline info is stored.");
 		File file = new File(input.readLine());
-		
+
 		// open file to check for valid format
 		BufferedReader csv = new BufferedReader(new FileReader(file));
 		int lineNum = 0;
@@ -117,10 +117,10 @@ public class pittToursAdmin {
 				System.exit(1); // exit program
 			}
 		}
-		csv.close(); 
+		csv.close();
 		// reopen file for reading
 		csv = new BufferedReader(new FileReader(file));
-		
+
 		while (csv.ready()){
 			String line = csv.readLine();
 			String[] vals = line.split(",");
@@ -132,7 +132,7 @@ public class pittToursAdmin {
 			String query = "insert into airline values (" + line + ")";
 			try{
 				PreparedStatement insrt = conn.prepareStatement(query);
-				
+
 				int rows = insrt.executeUpdate();
 				System.out.println(rows + " rows updated.");
 				insrt.close();
@@ -144,13 +144,58 @@ public class pittToursAdmin {
 		input.close();
 		csv.close();
 	}
-	
+
+public static void loadAirlineExe(Connection conn) throws IOException {
+  System.out.println("\n\nPreparing to load airline information...");
+  BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
+  System.out.println("\nPlease enter the file name where the airline info is stored.");
+  File file = new File("./sample-data/sample-air.csv");
+
+  // open file to check for valid format
+  BufferedReader csv = new BufferedReader(new FileReader(file));
+  int lineNum = 0;
+  while (csv.ready()) {
+    lineNum++;
+    if (csv.readLine().split(",").length != 5) {
+      System.out.println("\n\nERROR. File is not properly formatted. Error at line " + lineNum + ". Expecting a csv file with 5 entries per line.\n\n**EXAMPLE**:\t001,United Airlines,UAL,Chicago,1931");
+      csv.close();
+      System.exit(1); // exit program
+    }
+  }
+  csv.close();
+  // reopen file for reading
+  csv = new BufferedReader(new FileReader(file));
+
+  while (csv.ready()){
+    String line = csv.readLine();
+    String[] vals = line.split(",");
+    String com = ", ";
+    // expecting array like ["001", "United Airlines", "UAL", "Chicago", "1931"]
+    line = "\'".concat(vals[0]).concat("\', \'").concat(vals[1]).concat("\', \'").concat(vals[2]).concat("\', ").concat(vals[4]);
+    System.out.println("params: " + line);
+    // replace previous line with call to loadPlane procedure in pl/sql with line string as params;
+    String query = "insert into airline values (" + line + ")";
+    try{
+      PreparedStatement insrt = conn.prepareStatement(query);
+
+      int rows = insrt.executeUpdate();
+      System.out.println(rows + " rows updated.");
+      insrt.close();
+    } catch (SQLException e) {
+      System.out.println("Insert Failed!");
+      e.printStackTrace();
+    }
+  }
+  input.close();
+  csv.close();
+}
+
 	public static void loadSchedule(Connection conn) throws IOException {
 		System.out.println("\n\nPreparing to load schedule information...");
 		BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
 		System.out.println("Please enter the file name where the schedule info is stored.\n");
 		File file = new File(input.readLine());
-		
+
 		// open file to check format of file
 		BufferedReader csv = new BufferedReader(new FileReader(file));
 		int lineNum = 0;
@@ -173,10 +218,10 @@ public class pittToursAdmin {
 			System.out.println("Params: " + line);
 			// delete print statement and call loadSchedule procedure
 			String query = "insert into flight values (" + line + ")";
-			
+
 			try {
 				PreparedStatement insrt = conn.prepareStatement(query);
-				
+
 				int rows = insrt.executeUpdate();
 				System.out.println(rows + " rows updated.");
 				insrt.close();
@@ -184,9 +229,51 @@ public class pittToursAdmin {
 				System.out.println("Insert Failed!");
 				e.printStackTrace();
 			}
-		}		
+		}
 	}
-	
+
+	public static void loadScheduleExe(Connection conn) throws IOException {
+		System.out.println("\n\nPreparing to load schedule information...");
+		BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
+		System.out.println("Please enter the file name where the schedule info is stored.\n");
+		File file = new File("./sample-data/sample-flight.csv");
+
+		// open file to check format of file
+		BufferedReader csv = new BufferedReader(new FileReader(file));
+		int lineNum = 0;
+		while (csv.ready()) {
+			lineNum++;
+			if (csv.readLine().split(",").length != 8) {
+				System.out.println("\n\nERROR! File is not properly formatted. Error at line " + lineNum + ". Expecting a csv file with 8 entries per line.\n\n**EXAMPLE**:\t153,001,A320,PIT,JFK,1000,1120,SMTWTFS");
+				csv.close();
+				System.exit(1); // exit the program
+			}
+		}
+		csv.close();
+		// reopen file for reading
+		csv = new BufferedReader(new FileReader(file));
+		while (csv.ready()) {
+			String line = csv.readLine();
+			// format string for insertion into db
+			line = line.replaceAll(",", "\', \'");
+			line = "\'" + line + "\'";
+			System.out.println("Params: " + line);
+			// delete print statement and call loadSchedule procedure
+			String query = "insert into flight values (" + line + ")";
+
+			try {
+				PreparedStatement insrt = conn.prepareStatement(query);
+
+				int rows = insrt.executeUpdate();
+				System.out.println(rows + " rows updated.");
+				insrt.close();
+			} catch (SQLException e) {
+				System.out.println("Insert Failed!");
+				e.printStackTrace();
+			}
+		}
+	}
+
 	public static void loadPricing(Connection conn) throws IOException {
 		System.out.println("Preparing to load pricing information.");
 		BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
@@ -205,7 +292,7 @@ public class pittToursAdmin {
 		else {
 			System.out.println("ERROR: Invalid input! Options are \"L\" or \"C\"!");
 			loadPricing(conn);
-		}			
+		}
 	}
 	public static void changePriceData(Connection conn) throws IOException {
 		BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
@@ -218,7 +305,7 @@ public class pittToursAdmin {
 			System.exit(1);
 		}
 		System.out.println("Departure City: " + depCity);
-		
+
 		System.out.println("\nPlease enter the destination city for the flight. E.G. \"PIT\"");
 		System.out.println("Waiting for input...");
 		String arrCity = input.readLine().toUpperCase();
@@ -228,17 +315,17 @@ public class pittToursAdmin {
 			System.exit(1);
 		}
 		System.out.println("Destination City: " + arrCity);
-		
+
 		System.out.println("\nPlease eneter the new high price for the flight.");
 		System.out.println("Waiting for input...");
 		int hiPrice = Integer.valueOf(input.readLine());
-		
+
 		System.out.println("High Price: $" + hiPrice);
-		
+
 		System.out.println("\nPlease eneter the new low price for the flight.");
 		System.out.println("Waiting for input...");
 		int loPrice = Integer.valueOf(input.readLine());
-		
+
 		System.out.println("Low Price: $" + loPrice);
 		input.close();
 		// call changePrice with params depCity, arrCity, hiPrice, loPrice
@@ -247,7 +334,7 @@ public class pittToursAdmin {
 									" where departure_city = \'" + depCity + "\' and arrival_city = \'" + arrCity + "\'";
 			try {
 				PreparedStatement updt = conn.prepareStatement(query);
-				
+
 				int rows = updt.executeUpdate();
 				System.out.println(rows + " rows updated.");
 				updt.close();
@@ -255,14 +342,14 @@ public class pittToursAdmin {
 				System.out.println("Update Failed!");
 				e.printStackTrace();
 			}
-		
+
 	}
 	public static void loadPriceData(Connection conn) throws IOException {
 		BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
 		System.out.println("\nPlease enter the file name where the pricing info is stored.");
 		System.out.println("Waiting for input...");
 		File file = new File(input.readLine());
-		
+
 		// open file to check format of file
 		BufferedReader csv = new BufferedReader(new FileReader(file));
 		int lineNum = 0;
@@ -285,10 +372,10 @@ public class pittToursAdmin {
 			System.out.println("Params: " + line);
 			// delete print statement and call loadPricing procedure
 			String query = "insert into price values (" + line + ")";
-			
+
 			try {
 				PreparedStatement insrt = conn.prepareStatement(query);
-				
+
 				int rows = insrt.executeUpdate();
 				System.out.println(rows + " rows updated.");
 				insrt.close();
@@ -296,19 +383,62 @@ public class pittToursAdmin {
 				System.out.println("Update Failed!");
 				e.printStackTrace();
 			}
-			
+
 		}
 	}
-	
+
+  public static void loadPriceDataExe(Connection conn) throws IOException {
+		BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
+		System.out.println("\nPlease enter the file name where the pricing info is stored.");
+		System.out.println("Waiting for input...");
+		File file = new File("./sample-data/");
+
+		// open file to check format of file
+		BufferedReader csv = new BufferedReader(new FileReader(file));
+		int lineNum = 0;
+		while (csv.ready()) {
+			lineNum++;
+			if (csv.readLine().split(",").length != 5) {
+				System.out.println("\n\nERROR! File is not properly formatted. Error at line " + lineNum + ". Expecting a csv file with 5 entries per line.\n\n**EXAMPLE**:\tPIT,JFK,001,250,120");
+				csv.close();
+				System.exit(1); // exit the program
+			}
+		}
+		csv.close();
+		// reopen file for reading
+		csv = new BufferedReader(new FileReader(file));
+		while (csv.ready()) {
+			String line = csv.readLine();
+			// line = line.replaceAll(",", ", ");
+			String[] vals = line.split(",");
+			line = "\'" + vals[0] + "\', \'" + vals[1] + "\', \'" + vals[2] + "\', " + vals[3] + ", " + vals[4];
+			System.out.println("Params: " + line);
+			// delete print statement and call loadPricing procedure
+			String query = "insert into price values (" + line + ")";
+
+			try {
+				PreparedStatement insrt = conn.prepareStatement(query);
+
+				int rows = insrt.executeUpdate();
+				System.out.println(rows + " rows updated.");
+				insrt.close();
+			} catch (SQLException e) {
+				System.out.println("Update Failed!");
+				e.printStackTrace();
+			}
+
+		}
+	}
+
 	public static void loadPlane(Connection conn) throws IOException {
 		System.out.println("Preparing to load plane information.");
 		BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
 		System.out.println("Please enter the file name where the plane info is stored.");
 		File file = new File(input.readLine());
-		
+
 		// open file to check format of file
 		BufferedReader csv = new BufferedReader(new FileReader(file));
-		
+
 		int lineNum = 0;
 		while (csv.ready()) {
 			lineNum++;
@@ -325,17 +455,17 @@ public class pittToursAdmin {
 			String line = csv.readLine();
 			// line = line.replaceAll(",", ", ");
 			String[] vals = line.split(",");
-			
+
 			System.out.println("Params: " + line);
 			// delete print statement and call loadPlane procedure
-			
+
 			line = "\'" + vals[0] + "\', \'" + vals[1] + "\', " + vals[2] + ", TO_DATE(\'" + vals[3] + "\', \'mm/dd/yyyy\'), " + vals[4] + ", \'" + vals[5] + "\'";
-			
+
 			String query = "insert into plane values (" + line + ")";
-			
+
 			try {
 				PreparedStatement insrt = conn.prepareStatement(query);
-				
+
 				int rows = insrt.executeUpdate();
 				System.out.println(rows + " rows updated.");
 				insrt.close();
@@ -345,7 +475,7 @@ public class pittToursAdmin {
 			}
 		}
 	}
-	
+
 	public static void generatePassengerList(Connection conn) throws IOException {
 		System.out.println("Preparing to generate passenger manifest.");
 		BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
@@ -354,16 +484,16 @@ public class pittToursAdmin {
 		System.out.println("Please enter the desired date in the format dd-mmm-yyyy.");
 		String flightDate = input.readLine();
 		// create and execute query on passengers_on_flight view (in admin-procedures.sql), then print results
-		
+
 		/*
 		*	Might need to change date format
 		*/
 		String query = "select salutation, first_name, last_name from passengers_on_flight where flight_number = \'" + flightNum + "\' and flight_date = \'" + flightDate + "\'";
 		// execute query
-		
+
 		try {
 				PreparedStatement srch = conn.prepareStatement(query);
-				
+
 				ResultSet rs = srch.executeQuery();
 				System.out.println("Title\tFirst name\tLast name");
 				System.out.println("----------------------------------");
@@ -372,7 +502,7 @@ public class pittToursAdmin {
 					title = rs.getString(1);
 					fName = rs.getString(2);
 					lName = rs.getString(3);
-					
+
 					System.out.println(title + "\t" + fName + "\t" + lName);
 				}
 				srch.close();
