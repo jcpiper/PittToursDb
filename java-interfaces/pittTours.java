@@ -40,7 +40,7 @@ public class pittTours{
 	}
 	
 	// this method will call all methods multiple times w/ large datasets and output results
-	public static void breakIt() {
+	public static void breakIt() throws IOException {
 		Connection conn = null;
 		try {
 			// register oracle driver
@@ -93,6 +93,19 @@ public class pittTours{
 		getRoutesOnDayByAirlineTest(conn);
 		System.out.println("\n\n---------------------------------------------\n");		
 		
+		// test add reservation
+		// System.out.println("Testing add reservation");
+		// addReservationTest(conn);
+		// System.out.println("\n\n---------------------------------------------\n");
+		
+		//show reservation info test
+		System.out.println("Testing show reservation info function");
+		showResInfoTest(conn);
+		System.out.println("\n\n---------------------------------------------\n");
+		
+		//buy ticket test
+		System.out.println("Testing buy ticket function");
+		buyTicketTest(conn);
 	}
 	
 	public static int addCustomerTest(Connection conn, String[] fNames, String[] lNames) {
@@ -221,7 +234,42 @@ public class pittTours{
 		}
 	}
 	
-	public static void addReservationTest(Connection conn) {
+	public static void addReservationTest(Connection conn) throws IOException {
+		ArrayList<String> flights = new ArrayList<String>();
+		ArrayList<String> dates = new ArrayList<String>();
 		
+		for(int i = 0; i < 3; i++) {
+			flights.add(String.valueOf(i));
+		}
+		dates.add("11-SEP-2017");
+		dates.add("12-dec-2017");
+		dates.add("16-JUN-2017");
+		
+		pittToursCustomer.addReservationQuery(conn, flights, dates);
+	}
+	
+	public static void showResInfoTest(Connection conn) {
+		System.out.println("Testing system agains 1000 randomly generated reservation numbers");
+		
+		for (int i = 0; i < 1000; i++) {
+			pittToursCustomer.showResInfoQuery(conn, getResNum());
+		}
+	}
+	
+	public static String getResNum() {
+		String base = "0123456789";
+		StringBuilder sb = new StringBuilder(5);
+		for( int i = 0; i < 5; i++ ) 
+			sb.append( base.charAt( rand.nextInt(base.length()) ) );
+		return sb.toString();
+	}
+	
+	public static void buyTicketTest(Connection conn) {
+		pittToursCustomer.buyTicketQuery(conn, "30505");
+		pittToursCustomer.buyTicketQuery(conn, "88071");
+		pittToursCustomer.buyTicketQuery(conn, "75864");
+		pittToursCustomer.buyTicketQuery(conn, "14195");
+		pittToursCustomer.buyTicketQuery(conn, "74331");
+		pittToursCustomer.buyTicketQuery(conn, "66380");
 	}
 }
