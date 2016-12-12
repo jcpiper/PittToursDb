@@ -743,7 +743,9 @@ public class pittToursCustomer {
 		main(new String[1]);
 	}
 	
-	public static void addReservationQuery(Connection conn, ArrayList<String> flightNumbers, ArrayList<String> depDates) {
+	public static void addReservationQuery(Connection conn, ArrayList<String> flightNumbers, ArrayList<String> depDates) throws IOException {
+		BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
+		
 		String maxSeatsQuery = "select max(plane_capacity) from plane";
 		int maxSeats = 0;
 		try{
@@ -842,15 +844,13 @@ public class pittToursCustomer {
 			System.out.println("Y/N");
 			String choice = input.readLine().toUpperCase();
 			if(choice.equals("Y"))
-				main(new String[1]);
+				return;
 			else if(choice.equals("N"))
 				System.exit(0);
 			else {
 				System.out.println("INVALID OPTION\n");
 			}
 		}
-		
-		return;
 	}
 
   /* 9. showResInfo */
@@ -861,14 +861,18 @@ public class pittToursCustomer {
       System.out.println("Reservation Number:");
       String resNum = input.readLine();
 
-      // input.close();
-
+			showResInfoQuery(conn, resNum);
+      main(new String[1]);
+		}
+		
+		public static void showResInfoQuery(Connection conn, String resNum) {
       // Call SQL/PL, print all flights for this reservation number, print error otherwise
 			String query = "select distinct flight_number from reservation_detail where reservation_number = \'" + resNum + "\'";
-			
+			PreparedStatement getFlights = null;
+			ResultSet flights = null;
 			try {
-				PreparedStatement getFlights = conn.prepareStatement(query);
-				ResultSet flights = getFlights.executeQuery();
+				getFlights = conn.prepareStatement(query);
+				flights = getFlights.executeQuery();
 				
 				//check that query is not empty
 				if (!flights.next()) {
@@ -884,15 +888,21 @@ public class pittToursCustomer {
 				// System.out.println("Has another row? " + flights.next());
 				
 				do {
-					System.out.println("Now at row " + flights.getRow());
+					// System.out.println("Now at row " + flights.getRow());
 					System.out.println("Flight: " + flights.getString(1));
 				} while(flights.next());
+				
+				
 			} catch(SQLException e) {
 				System.out.println("Query Failed!");
 				e.printStackTrace();
+				
+			} finally {
+				try{ flights.close();} catch(Exception e) {};
+				try { getFlights.close();} catch(Exception e) {};
 				return;
 			}
-			main(new String[1]);
+			// return;
   	}
 /*
 * ^^^ NEEDS TESTING ^^^
@@ -908,8 +918,11 @@ public class pittToursCustomer {
 
 		input.close();
 
-		// Call SQL/PL, see if ticket purchased, if not, purchase ticket
-		
+		buyTicketQuery(conn, resNum);
+		main(new String[1]);
+	}
+	
+	public static void buyTicketQuery(Connection conn, String resNum) {
 		String sql = "update reservation set ticketed = \'Y\' where reservation_number = \'" + resNum + "\'";
 		
 		try {
@@ -926,6 +939,6 @@ public class pittToursCustomer {
 			e.printStackTrace();
 			return;
 		}
-		main(new String[1]);
+		return;
 	}
 }
