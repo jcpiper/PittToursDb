@@ -15,8 +15,8 @@ public class pittToursAdmin {
 			DriverManager.registerDriver (new oracle.jdbc.driver.OracleDriver());
 
 			String url = "jdbc:oracle:thin:@class3.cs.pitt.edu:1521:dbclass";
-			String uname = "pmh35";
-			String passwrd = "4066320";
+			String uname = "jcp68";
+			String passwrd = "3788990";
 			conn = DriverManager.getConnection(url, uname, passwrd);
 
 		} catch (SQLException e) {
@@ -148,7 +148,6 @@ public class pittToursAdmin {
 public static void loadAirlineExe(Connection conn) throws IOException {
   System.out.println("\n\nPreparing to load airline information...");
   BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
-  System.out.println("\nPlease enter the file name where the airline info is stored.");
   File file = new File("./sample-data/sample-air.csv");
 
   // open file to check for valid format
@@ -235,7 +234,6 @@ public static void loadAirlineExe(Connection conn) throws IOException {
 	public static void loadScheduleExe(Connection conn) throws IOException {
 		System.out.println("\n\nPreparing to load schedule information...");
 		BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
-		System.out.println("Please enter the file name where the schedule info is stored.\n");
 		File file = new File("./sample-data/sample-flight.csv");
 
 		// open file to check format of file
@@ -389,9 +387,8 @@ public static void loadAirlineExe(Connection conn) throws IOException {
 
   public static void loadPriceDataExe(Connection conn) throws IOException {
 		BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
-		System.out.println("\nPlease enter the file name where the pricing info is stored.");
 		System.out.println("Waiting for input...");
-		File file = new File("./sample-data/");
+		File file = new File("./sample-data/sample-pricing.csv");
 
 		// open file to check format of file
 		BufferedReader csv = new BufferedReader(new FileReader(file));
@@ -475,6 +472,52 @@ public static void loadAirlineExe(Connection conn) throws IOException {
 			}
 		}
 	}
+
+	public static void loadPlaneExe(Connection conn) throws IOException {
+		System.out.println("Preparing to load plane information.");
+		BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
+		File file = new File("./sample-data/sample-plane.csv");
+
+		// open file to check format of file
+		BufferedReader csv = new BufferedReader(new FileReader(file));
+
+		int lineNum = 0;
+		while (csv.ready()) {
+			lineNum++;
+			if (csv.readLine().split(",").length != 6) {
+				System.out.println("\n\nERROR! File is not properly formatted. Error at line " + lineNum + ". Expecting a csv file with 6 entries per line.\n\n**EXAMPLE**:\tB737,Boeing,125,09/09/2009,1996,001");
+				csv.close();
+				System.exit(1); // exit the program
+			}
+		}
+		csv.close();
+		// reopen file for reading
+		csv = new BufferedReader(new FileReader(file));
+		while (csv.ready()) {
+			String line = csv.readLine();
+			// line = line.replaceAll(",", ", ");
+			String[] vals = line.split(",");
+
+			System.out.println("Params: " + line);
+			// delete print statement and call loadPlane procedure
+
+			line = "\'" + vals[0] + "\', \'" + vals[1] + "\', " + vals[2] + ", TO_DATE(\'" + vals[3] + "\', \'mm/dd/yyyy\'), " + vals[4] + ", \'" + vals[5] + "\'";
+
+			String query = "insert into plane values (" + line + ")";
+
+			try {
+				PreparedStatement insrt = conn.prepareStatement(query);
+
+				int rows = insrt.executeUpdate();
+				System.out.println(rows + " rows updated.");
+				insrt.close();
+			} catch (SQLException e) {
+				System.out.println("Update Failed!");
+				e.printStackTrace();
+			}
+		}
+	}
+
 
 	public static void generatePassengerList(Connection conn) throws IOException {
 		System.out.println("Preparing to generate passenger manifest.");
